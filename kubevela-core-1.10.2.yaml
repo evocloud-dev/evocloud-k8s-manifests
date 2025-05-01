@@ -1,3 +1,4 @@
+---
 #vela-system namespace: created by adding the stanza below
 apiVersion: v1
 kind: Namespace
