@@ -13,7 +13,7 @@ image:
 # Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers.
 enabledControllers:
   - cloud-node
-  - cloud-node-lifecycle
+  #- cloud-node-lifecycle
   - node-csr-approval
   # - node-ipam-controller #needed if ipv6 is used
 
