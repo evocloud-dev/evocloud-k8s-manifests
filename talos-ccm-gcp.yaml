@@ -1,0 +1,22 @@
+---
+# -- List of controllers should be enabled.
+# Use '*' to enable all controllers.
+# Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers.
+enabledControllers:
+  - cloud-node
+  - cloud-node-lifecycle
+  - node-csr-approval
+  # - node-ipam-controller #needed if ipv6 is used
+
+# -- List of node transformations.
+# Available matchExpressions key values: https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/runtime/platform_metadata.go#L28
+transformations:
+  - name: worker
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^evotalos-wk-.+$
+    labels:
+      node-role.kubernetes.io/worker-node: ""
