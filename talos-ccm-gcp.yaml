@@ -26,6 +26,6 @@ transformations:
           - key: hostname
             operator: Regexp
             values:
-              - ^evotalos-wk-.+$
+              - ^evotalos-wk.+$
     labels:
       node-role.kubernetes.io/worker-node: ""
