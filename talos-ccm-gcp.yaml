@@ -1,3 +1,13 @@
+#Source values.yaml: https://github.com/siderolabs/talos-cloud-controller-manager/blob/main/charts/talos-cloud-controller-manager/values.yaml
+
+image:
+  # -- CCM image repository.
+  repository: ghcr.io/siderolabs/talos-cloud-controller-manager
+  # -- Pull policy: IfNotPresent or Always.
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: "edge"
+  
 # -- List of controllers should be enabled.
 # Use '*' to enable all controllers.
 # Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers.
