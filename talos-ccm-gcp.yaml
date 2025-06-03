@@ -13,10 +13,17 @@ image:
 # Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers.
 enabledControllers:
   - cloud-node
-  #- cloud-node-lifecycle
+  - cloud-node-lifecycle
   - node-csr-approval
   # - node-ipam-controller #needed if ipv6 is used
 
+# -- Deploy CCM  in Daemonset mode.
+# CCM will use hostNetwork and connect to the Kubernetes API server on the current node by default.
+# Optionally you can specify the Kubernetes API server host and port.
+# You can run it without CNI plugin.
+daemonSet:
+  enabled: true
+  
 # -- List of node transformations.
 # Available matchExpressions key values: https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/runtime/platform_metadata.go#L28
 transformations:
