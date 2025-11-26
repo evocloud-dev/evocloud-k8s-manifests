@@ -1,0 +1,40 @@
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+    - '@local /work/packages'
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    - ./melange.rsa.pub
+  packages:
+    - crossplane@local
+
+annotations:
+  org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
+  org.opencontainers.image.title: Crossplane (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free Crossplane OCI image
+  org.opencontainers.image.source: https://github.com/crossplane/crossplane
+  org.opencontainers.image.licenses: Apache-2.0
+  org.opencontainers.image.vendor: EvoCloud
+  org.opencontainers.image.version: "2.1.1"
+
+accounts:
+  groups:
+    - groupname: nonroot
+      gid: 65510
+      members: []
+  users:
+    - username: nonroot
+      uid: 65510
+      shell: /bin/false
+      homedir: /dev/null
+  run-as: nonroot
+
+environment:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+
+entrypoint:
+  command: /usr/bin/crossplane
+
+archs:
+  - amd64
+

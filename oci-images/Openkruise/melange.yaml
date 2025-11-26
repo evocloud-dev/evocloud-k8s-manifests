@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Source: https://github.com/openkruise/kruise
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: openkruise-all-in-one
+  version: 1.8.2
+  epoch: 0
+  description: "OpenKruise is an extended workload management suite for Kubernetes."
+  target-architecture:
+    - x86_64
+    # - aarch64
+  url: "https://openkruise.io/"
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      # - busybox
+      # - go
+      # - git
+      # - make
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p kruise
+
+  - name: "Download OpenKruise source"
+    uses: fetch
+    with:
+      uri: https://github.com/openkruise/kruise/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 4b91c205279df3886983ff61a659e6bb7ca1225449cf4fe3885644d8789e0408c53a7362dd2eb0ff5bc6391e685265285cef45ba661ff3bf36b06e9f3a25b80e
+      directory: kruise
+      delete: true
+
+  
+
+  - name: "Build OpenKruise Manager"
+    uses: go/build
+    with:
+      modroot: kruise
+      packages: .
+      ldflags: "-s"
+      output: kruise-manager
+
+  - name: "Build OpenKruise Daemon"
+    uses: go/build
+    with:
+      modroot: kruise
+      packages: ./cmd/daemon
+      ldflags: "-s"
+      output: kruise-daemon
+
+  - name: "Build OpenKruise HelmHook"
+    uses: go/build
+    with:
+      modroot: kruise
+      packages: ./cmd/helm_hook
+      ldflags: "-s"
+      output: kruise-helm_hook
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf kruise
+

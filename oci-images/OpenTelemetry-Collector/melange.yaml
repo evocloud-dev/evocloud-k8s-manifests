@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+package:
+  name: opentelemetry-collector
+  version: 0.140.0
+  epoch: 0
+  description: "OpenTelemetry Collector provides a vendor-agnostic implementation of receiving, processing, and exporting telemetry data."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: Apache-2.0
+      paths:
+        - "*"
+  url: "https://github.com/open-telemetry/opentelemetry-collector"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      - go
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p opentelemetry-collector
+
+  - name: "DOWNLOAD OPENTELEMETRY-COLLECTOR SOURCE"
+    uses: fetch
+    with:
+      uri: https://github.com/open-telemetry/opentelemetry-collector/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: "ece08c87499c103951fe76b73a6f63321caee97d3eec1d227f5a26fab6f04c0813272dce27ee74c053bb9c357476a231648c99ef0066b316304846fe7698eb41"
+      directory: opentelemetry-collector
+      strip-components: 1
+      delete: true
+
+  - name: "RUN BUILDER GENERATOR"
+    uses: go/build
+    with:
+      modroot: opentelemetry-collector/cmd/builder
+      packages: .
+      ldflags: "-s"
+      output: builder
+
+  - name: "BUILD MDATAGEN"
+    uses: go/build
+    with:
+      modroot: opentelemetry-collector/cmd/mdatagen
+      packages: .
+      ldflags: "-s"
+      output: mdatagen
+
+
+  - name: "BUILD OTELCORECOL"
+    uses: go/build
+    with:
+      modroot: opentelemetry-collector/cmd/otelcorecol
+      packages: .
+      ldflags: "-s"
+      output: otelcorecol
+
+  - uses: strip
+
+  - name: "CLEAN UP"
+    runs: |
+      rm -rf opentelemetry-collector
+

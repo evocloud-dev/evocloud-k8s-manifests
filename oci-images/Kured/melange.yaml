@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+package:
+  name: kured
+  version: 1.20.0
+  epoch: 0
+  description: "Kured (KUbernetes REboot Daemon) is a Kubernetes daemon that performs safe node reboots."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubereboot/kured"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      - go # ensure Go toolchain is available
+
+pipeline:
+  - name: "CREATE KURED SOURCE DIR"
+    runs: |
+      mkdir kured
+
+  - name: "DOWNLOAD KURED SOURCE"
+    uses: fetch
+    with:
+      uri: https://github.com/kubereboot/kured/archive/refs/tags/${{package.version}}.tar.gz
+      expected-sha512: 2661e1128b463184e00a21914161bb6d884f395609beed9c4324b0b994c16a267cb25559b430a2de0a10e155cf58913fb626fbb36a307ed63122d4205a474a47
+      directory: kured
+      strip-components: 1
+      delete: true
+
+  - name: "BUILD KURED BINARY"
+    uses: go/build
+    with:
+      modroot: kured
+      packages: ./cmd/kured
+      ldflags: "-s -w"
+      output: kured
+
+  - uses: strip
+
+  - name: "CLEAN UP"
+    runs: |
+      rm -rf kured
+
