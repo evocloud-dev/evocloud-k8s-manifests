@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Source: https://github.com/kubernetes-sigs/external-dns
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: Kamaji
+  version: 25.11.5
+  epoch: 0
+  description: "Kamaji is the Hosted Control Plane Manager for Kubernetes."
+  target-architecture:
+    - x86_64
+    # - aarch64
+  url: "https://github.com/clastix/kamaji"
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      #- busybox
+      #- go
+
+
+vars:
+  git_commit: "ac7da5745441907a82684ebe44d11ab0b0bf3e79"
+
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p kamaji
+
+  - name: "Download kamaji source"
+    uses: fetch
+    with:
+      uri: https://github.com/clastix/kamaji/archive/refs/tags/edge-${{package.version}}.tar.gz
+      expected-sha512: 7b67675ae5177d67c52ade905277526049772726a53d48fc74db813330bb839c1aea57abb2c946722e606eeb93c9cc996ad8a6e740ec187edc282ca8e0e729f6 
+      directory: kamaji
+      delete: true
+
+  - name: "BUILD KAMAJI BINARY"
+    uses: go/build
+    with:
+      modroot: kamaji
+      packages: .
+      ldflags: |
+        -s \
+        -X github.com/clastix/kamaji/internal.GitCommit=${{vars.git_commit}} \
+        -X github.com/clastix/kamaji/internal.GitTag=${{package.version}} \
+        -X github.com/clastix/kamaji/internal.GitDirty=clean
+        -X github.com/clastix/kamaji/internal.GitRepo=https://github.com/clastix/kamaji
+      output: kamaji
+
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf kamaji
