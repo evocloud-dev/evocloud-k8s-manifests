@@ -2,7 +2,7 @@
 
 # Source: https://github.com/kubernetes-sigs/external-dns
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
-
+# Reference: https://github.com/kubernetes-sigs/external-dns/blob/master/Makefile
 package:
   name: external-dns
   version: 0.20.0

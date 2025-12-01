@@ -1,23 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
-
 # Source: https://github.com/kubernetes-sigs/external-dns
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
-
+# Reference: https://github.com/clastix/kamaji/blob/master/Makefile
 package:
   name: Kamaji
   version: 25.11.5
-  epoch: 0
+  epoch: 1
   description: "Kamaji is the Hosted Control Plane Manager for Kubernetes."
   target-architecture:
     - x86_64
-    # - aarch64
+    - aarch64
   url: "https://github.com/clastix/kamaji"
   copyright:
-    - attestation: |
-        Created by the EvoCloud Engineering Team. 
-        Copyright (C) 2025 EvoCloud, Inc.
-      license: MPL-2.0
-
+    - license: Apache-2.0
+      paths:
+        - "*"
 
 environment:
   contents:
@@ -33,6 +30,10 @@ environment:
 
 vars:
   git_commit: "ac7da5745441907a82684ebe44d11ab0b0bf3e79"
+  git_repo: "https://github.com/clastix/kamaji"
+  git_dirty: "clean"
+  build_time: "2025-11-29T13:04:42Z"
+
 
 
 pipeline:
@@ -48,17 +49,26 @@ pipeline:
       directory: kamaji
       delete: true
 
+
+# Fixes security vulnerability GHSA-f6x5-jh6r-wrfv in golang.org/x/crypto
   - name: "BUILD KAMAJI BINARY"
     uses: go/build
     with:
       modroot: kamaji
       packages: .
+      # secfixes:
+      #   25.11.5r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0  
       ldflags: |
-        -s \
-        -X github.com/clastix/kamaji/internal.GitCommit=${{vars.git_commit}} \
-        -X github.com/clastix/kamaji/internal.GitTag=${{package.version}} \
+        -s 
+        -X github.com/clastix/kamaji/internal.GitCommit=${{vars.git_commit}} 
+        -X github.com/clastix/kamaji/internal.GitTag=${{package.version}} 
         -X github.com/clastix/kamaji/internal.GitDirty=clean
-        -X github.com/clastix/kamaji/internal.GitRepo=https://github.com/clastix/kamaji
+        -X github.com/clastix/kamaji/internal.BuildTime=${{vars.build_time}}
+        -X github.com/clastix/kamaji/internal.GitRepo=${{vars.git_repo}}
+
       output: kamaji
 
 

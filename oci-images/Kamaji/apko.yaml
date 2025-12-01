@@ -23,7 +23,7 @@ annotations:
   org.opencontainers.image.source: https://github.com/clastix/kamaji"
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
-  org.opencontainers.image.version: "edge-25.11.5" 
+  org.opencontainers.image.version: "25.11.5" 
 
 accounts:
   groups:

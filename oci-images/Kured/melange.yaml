@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
 # SPDX-License-Identifier: MPL-2.0
-
+# Source: https://github.com/kubereboot/kured
+# Reference: https://github.com/kubereboot/kured/blob/main/.goreleaser.yml
 package:
   name: kured
   version: 1.20.0
-  epoch: 0
+  epoch: 1
   description: "Kured (KUbernetes REboot Daemon) is a Kubernetes daemon that performs safe node reboots."
   target-architecture:
     - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
@@ -44,7 +45,7 @@ pipeline:
     with:
       modroot: kured
       packages: ./cmd/kured
-      ldflags: "-s -w"
+      ldflags: "-s -X main.version=${{package.version}}"
       output: kured
 
   - uses: strip

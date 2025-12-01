@@ -20,7 +20,7 @@ annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
   org.opencontainers.image.title: Kured (Packaged by EvoCloud)
   org.opencontainers.image.description: Distroless and near CVE free Kured OCI image
-  org.opencontainers.image.source: https://github.com/hashicorp/terraform-provider-google
+  org.opencontainers.image.source: https://github.com/kubereboot/kured
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
   org.opencontainers.image.version: "1.20.0" 

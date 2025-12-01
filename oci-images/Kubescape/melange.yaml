@@ -5,7 +5,7 @@
 package:
   name: kubescape
   version: 3.0.45
-  epoch: 0
+  epoch: 1
   description: "Kubernetes cluster scanner"
   target-architecture:
     - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
@@ -45,8 +45,12 @@ pipeline:
     with:
       modroot: kubescape
       packages: .
+      # secfixes:
+      #   3.0.45r1:
+      #     - GHSA-6gxw-85q2-q646
+      deps: github.com/anchore/grype@v0.104.1 
       ldflags:
-        -s -X https://github.com/kubescape/kubescape/pkg.Version=v${{package.version}}
+        -s -X https://github.com/kubescape/kubescape/v3/core/cautils.BuildNumber=${{package.version}}
       output: kubescape
 
   - uses: strip #Strip debugging symbols

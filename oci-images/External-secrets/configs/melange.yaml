@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Source: https://github.com/external-secrets/external-secrets
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/external-secrets/external-secrets/blob/main/cmd/esoctl/Makefile
+
+package:
+  name: external-secrets
+  version: 1.1.0
+  epoch: 1
+  description: "External Secrets Operator for Kubernetes"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: Apache-2.0
+  url: "https://github.com/external-secrets/external-secrets"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      - go
+      - git
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p external-secrets
+
+  - name: "Download External Secrets source"
+    uses: fetch
+    with:
+      uri: https://github.com/external-secrets/external-secrets/archive/refs/tags/helm-chart-${{package.version}}.tar.gz
+      expected-sha512: 8042e9e3f5525f656407137045d9a29399ec3845d4712ee3fccaef6dd825bb9c727459f81f93cbe8d5f7312f0bfc8f4453aae578e6aab50568af2d7a57c3de4b
+      directory: external-secrets
+      delete: true
+
+
+  - name: "Build Controller"
+    uses: go/build
+    with:
+      modroot: external-secrets
+      packages: .
+      # secfixes:
+      #   1.1.0r1:
+      #     - GHSA-j5w8-q4qc-rx2x
+      #     - GHSA-f6x5-jh6r-wrfv
+      deps: golang.org/x/crypto@v0.45.0 
+      ldflags: "-s -X main.version=${{package.version}}"
+      output: controller
+
+
+  - name: "Build esoctl CLI"
+    uses: go/build
+    with:
+      modroot: external-secrets
+      packages: ./cmd/esoctl
+      # secfixes:
+      #   1.1.0r1:
+      #     - GHSA-j5w8-q4qc-rx2x
+      #     - GHSA-f6x5-jh6r-wrfv
+      deps: golang.org/x/crypto@v0.45.0 
+      ldflags:  "-s -X main.version=${{package.version}}"
+      output: esoctl
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf external-secrets

@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
 # SPDX-License-Identifier: MPL-2.0
-#
+# Reference: https://github.com/spiffe/spire/blob/main/Makefile
 # Source: https://github.com/spiffe/spire
+
 package:
   name: spire-all-in-one
   version: 1.13.3
-  epoch: 0
+  epoch: 1
   description: "SPIRE is a production-ready implementation of the SPIFFE standard for establishing trust between software services across a network."
   target-architecture:
     - x86_64
@@ -48,11 +49,11 @@ pipeline:
       modroot: spire
       packages: ./cmd/spire-server
       # secfixes:
-      #   0.20.0r1:
+      #   1.13.3r1:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0  
-      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=v${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
+      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
       output: spire-server
 
   - name: "Build SPIRE Agent"
@@ -61,11 +62,11 @@ pipeline:
       modroot: spire
       packages: ./cmd/spire-agent
       # secfixes:
-      #   0.20.0r1:
+      #   1.13.3r1:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0  
-      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=v${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
+      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
       output: spire-agent
 
   - uses: strip

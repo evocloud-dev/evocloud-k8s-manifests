@@ -2,11 +2,11 @@
 
 # Source: https://github.com/kubernetes-sigs/external-dns
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
-
+# Reference: https://github.com/projectcapsule/capsule/blob/main/.goreleaser.yml
 package:
   name: capsule
   version: 0.11.1
-  epoch: 0
+  epoch: 1
   description: "Multi-tenancy and policy-based framework for Kubernetes."
   target-architecture:
     - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
@@ -50,12 +50,20 @@ pipeline:
       modroot: capsule
       packages: ./cmd
       # secfixes:
-      #   0.20.0r1:
+      #   0.11.1-r1:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
-      deps: golang.org/x/crypto@v0.45.0    
-      ldflags: "-s -X main.Version=${{package.version}}"
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: >
+        -s
+        -X main.Version=${{package.version}}
+        -X main.GitCommit={{ .Commit }}
+        -X main.GitTag={{ .Tag }}
+        -X main.GitDirty={{ .Date }}
+        -X main.BuildTime={{ .Date }}
+        -X main.GitRepo={{ .ProjectName }}
       output: capsule
+
 
   - uses: strip
 

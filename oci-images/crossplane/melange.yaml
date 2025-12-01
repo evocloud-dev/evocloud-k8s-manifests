@@ -48,7 +48,7 @@ pipeline:
     with:
       modroot: crossplane
       packages: ./cmd/crossplane
-      ldflags: "-s -X github.com/crossplane/crossplane/v2/internal/version.version=v${{package.version}}"
+      ldflags: "-s -X github.com/crossplane/crossplane/v2/internal/version.version=${{package.version}}"
       output: crossplane
 
 

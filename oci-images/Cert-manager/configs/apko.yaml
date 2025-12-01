@@ -13,17 +13,16 @@ contents:
     - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     - ./melange.rsa.pub
   packages:
-    #- ca-certificates-bundle
-    - capsule@local
+    - cert-manager-all-in-one@local
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Capsule (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE free Capsule OCI image
-  org.opencontainers.image.source: https://github.com/projectcapsule/capsule
-  org.opencontainers.image.licenses: MPL-2.0
+  org.opencontainers.image.title: Cert-manager ( acmesolver + cainjector + controller + startupapicheck + webhook) (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE free Cert-manager OCI image
+  org.opencontainers.image.source: https://github.com/cert-manager/cert-manager
+  org.opencontainers.image.licenses: Apache-2.0
   org.opencontainers.image.vendor: EvoCloud
-  org.opencontainers.image.version: "0.11.1" 
+  org.opencontainers.image.version: "1.19.1"
 
 accounts:
   groups:
@@ -34,7 +33,7 @@ accounts:
     - username: nonroot
       uid: 65510
       shell: /bin/false
-      homedir: /dev/null
+      #homedir: /dev/null
   run-as: nonroot
 
 environment:
@@ -42,17 +41,10 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bin/capsule
+  command: /usr/bash #--entrypoint= acmesolver --entrypoint=cainjector --entrypoint=controller --entrypoint=startupapicheck  --entrypoint=webhook  
   shell-fragment: ""
   services: {}
-
-#https://github.com/chainguard-dev/apko/blob/main/docs/layering.md
-#layering:
-#  strategy: "origin"
-#  budget: 10
+ 
 
 archs:
   - amd64
-
-
-
