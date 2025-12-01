@@ -46,9 +46,15 @@ pipeline:
       modroot: kubescape
       packages: .
       # secfixes:
+<<<<<<< HEAD
       #   3.0.45r1:
       #     - GHSA-6gxw-85q2-q646
       deps: github.com/anchore/grype@v0.104.1 
+=======
+      #   3.0.45-r1:
+      #     - GHSA-6gxw-85q2-q646
+      deps: github.com/anchore/grype@v0.104.1
+>>>>>>> e62ecec267898479a949d4dbc6206e74bc1d8635
       ldflags:
         -s -X https://github.com/kubescape/kubescape/v3/core/cautils.BuildNumber=${{package.version}}
       output: kubescape
