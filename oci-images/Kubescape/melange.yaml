@@ -1,6 +1,5 @@
 # SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
 # SPDX-License-Identifier: MPL-2.0
-#
 # Source: https://github.com/kubescape/kubescape
 package:
   name: kubescape
