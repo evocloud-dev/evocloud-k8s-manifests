@@ -2,6 +2,7 @@
 
 # Source: https://github.com/openkruise/kruise
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/cilium/tetragon/blob/main/Makefile
 
 package:
   name: tetragon-all-in-one
@@ -50,7 +51,7 @@ pipeline:
     with:
       modroot: tetragon
       packages: ./cmd/tetra
-      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=v${{package.version}}"
+      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=${{package.version}}"
       output: tetra
 
   - name: "Build Tetra-metrics-docs"
@@ -58,7 +59,7 @@ pipeline:
     with:
       modroot: tetragon
       packages: ./cmd/tetragon-metrics-docs
-      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=v${{package.version}}"
+      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=${{package.version}}"
       output: tetragon-metrics-docs
 
   - name: "Build Tetragon"
@@ -66,7 +67,7 @@ pipeline:
     with:
       modroot: tetragon
       packages: ./cmd/tetragon
-      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=v${{package.version}}"
+      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=${{package.version}}"
       output: tetragon
 
   - uses: strip

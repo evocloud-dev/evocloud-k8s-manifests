@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
 # SPDX-License-Identifier: MPL-2.0
 # Source: https://github.com/kubescape/kubescape
+# Reference: https://github.com/kubescape/kubescape/blob/master/.goreleaser.yaml
 package:
   name: kubescape
   version: 3.0.45
@@ -45,7 +46,7 @@ pipeline:
       modroot: kubescape
       packages: .
       # secfixes:
-      #   3.0.45r1:
+      #   3.0.45-r1:
       #     - GHSA-6gxw-85q2-q646
       deps: github.com/anchore/grype@v0.104.1 
       ldflags:

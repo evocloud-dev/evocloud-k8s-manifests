@@ -31,7 +31,6 @@ environment:
 vars:
   git_commit: "ac7da5745441907a82684ebe44d11ab0b0bf3e79"
   git_repo: "https://github.com/clastix/kamaji"
-  git_dirty: "clean"
   build_time: "2025-11-29T13:04:42Z"
 
 
@@ -49,15 +48,13 @@ pipeline:
       directory: kamaji
       delete: true
 
-
-# Fixes security vulnerability GHSA-f6x5-jh6r-wrfv in golang.org/x/crypto
   - name: "BUILD KAMAJI BINARY"
     uses: go/build
     with:
       modroot: kamaji
       packages: .
       # secfixes:
-      #   25.11.5r1:
+      #   25.11.5-r1:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0  

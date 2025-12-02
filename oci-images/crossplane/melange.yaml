@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Source: https://github.com/crossplane/crossplane
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
-
+# Reference: https://github.com/crossplane/crossplane/tree/main/cmd
 package:
-  name: crossplane
+  name: crossplane-all-in-one
   version: 2.1.1   
-  epoch: 0
+  epoch: 1
   description: "Crossplane is an open-source Kubernetes add-on that enables platform engineering"
   target-architecture:
     - x86_64
@@ -48,8 +48,14 @@ pipeline:
     with:
       modroot: crossplane
       packages: ./cmd/crossplane
+      # secfixes:
+      #   2.1.1-r1:
+      #     - GHSA-j5w8-q4qc-rx2x
+      #     - GHSA-f6x5-jh6r-wrfv
+      deps: golang.org/x/crypto@v0.45.0  
       ldflags: "-s -X github.com/crossplane/crossplane/v2/internal/version.version=${{package.version}}"
       output: crossplane
+
 
 
   - uses: strip

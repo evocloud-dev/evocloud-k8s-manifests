@@ -50,9 +50,8 @@ pipeline:
     with:
       modroot: kyverno
       packages: ./cmd/kyverno
-      ldflags: |
-        -s -w -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
-        -X github.com/kyverno/kyverno/pkg/version.GitCommit={{.Commit}}
+      ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
+      
       output: kyverno
 
 
@@ -62,9 +61,8 @@ pipeline:
       modroot: kyverno
       packages: ./cmd/kyverno-init
       deps: golang.org/x/crypto@v0.45.0
-      ldflags: |
-        -s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
-        -X github.com/kyverno/kyverno/pkg/version.GitCommit={{.Commit}}
+      ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
+      
       output: kyverno-init
 
 
@@ -73,9 +71,8 @@ pipeline:
     with:
       modroot: kyverno
       packages: ./cmd/cli/kubectl-kyverno
-      ldflags: |
-        -s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
-        -X github.com/kyverno/kyverno/pkg/version.GitCommit={{.Commit}}
+      ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
+        
       output: kubectl-kyverno
 
 
@@ -85,9 +82,7 @@ pipeline:
       modroot: kyverno
       packages: ./cmd/cleanup-controller
       deps: golang.org/x/crypto@v0.45.0
-      ldflags: |
-        -s -w -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
-        -X github.com/kyverno/kyverno/pkg/version.GitCommit={{.Commit}}
+      ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}"
       output: cleanup-controller
 
 
@@ -97,9 +92,8 @@ pipeline:
     with:
       modroot: kyverno
       packages: ./cmd/reports-controller
-      ldflags: |
-        -s -w -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
-        -X github.com/kyverno/kyverno/pkg/version.GitCommit={{.Commit}}
+      ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
+    
       output: reports-controller
 
 
@@ -109,9 +103,8 @@ pipeline:
     with:
       modroot: kyverno
       packages: ./cmd/background-controller
-      ldflags: |
-        -s -w -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
-        -X github.com/kyverno/kyverno/pkg/version.GitCommit={{.Commit}}
+      ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
+       
       output: background-controller
 
   - uses: strip

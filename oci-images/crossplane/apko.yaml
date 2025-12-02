@@ -1,3 +1,11 @@
+#SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+#Source:
+#Ref: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
+#Schema: https://github.com/chainguard-dev/apko/blob/51830a2e043ace2da4eba4265083b2e3298437a8/pkg/build/types/schema.json
+
+
 contents:
   repositories:
     - https://packages.wolfi.dev/os

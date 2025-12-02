@@ -31,6 +31,9 @@ environment:
       #- busybox
       #- go
 
+vars:
+  git_commit: "dd5b3df95ad723ebf9a93474c0f91d13e1b9e53d"
+
 pipeline:
   - name: "Prepare extraction directory"
     runs: |
@@ -54,14 +57,14 @@ pipeline:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0
-      ldflags: >
+      ldflags: |
         -s
         -X main.Version=${{package.version}}
-        -X main.GitCommit={{ .Commit }}
-        -X main.GitTag={{ .Tag }}
-        -X main.GitDirty={{ .Date }}
-        -X main.BuildTime={{ .Date }}
-        -X main.GitRepo={{ .ProjectName }}
+        -X main.GitCommit=${{vars.git_commit}}
+        -X main.GitTag={{.Tag}}
+        -X main.GitDirty={{.Date }
+        -X main.BuildTime={{.Date}}
+        -X main.GitRepo={{.ProjectName}}
       output: capsule
 
 

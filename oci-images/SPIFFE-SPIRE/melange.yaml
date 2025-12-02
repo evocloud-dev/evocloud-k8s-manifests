@@ -49,7 +49,7 @@ pipeline:
       modroot: spire
       packages: ./cmd/spire-server
       # secfixes:
-      #   1.13.3r1:
+      #   1.13.3-r1:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0  
@@ -62,7 +62,7 @@ pipeline:
       modroot: spire
       packages: ./cmd/spire-agent
       # secfixes:
-      #   1.13.3r1:
+      #   1.13.3-r1:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0  

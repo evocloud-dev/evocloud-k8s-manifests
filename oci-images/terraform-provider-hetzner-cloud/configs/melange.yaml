@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
 # SPDX-License-Identifier: MPL-2.0
+# Source: https://github.com/hetznercloud/terraform-provider-hcloud
+# Reference: https://github.com/hetznercloud/terraform-provider-hcloud/blob/main/.goreleaser.yml
 
 package:
   name: terraform-provider-hcloud
   version: 1.56.0
-  epoch: 0
+  epoch: 1
   description: "The Terraform Hetzner Cloud provider allows Terraform to manage resources on Hetzner Cloud."
   target-architecture:
     - x86_64
@@ -25,7 +27,11 @@ environment:
       - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     packages:
       - ca-certificates-bundle
-      - go
+      #- go
+
+vars:
+  git_commit: "dc14c303f6a252d84712c2b9c3ea9d530f4053f0"
+
 
 pipeline:
   - name: "CREATE TERRAFORM HETZNER PROVIDER DIR"
@@ -41,6 +47,8 @@ pipeline:
       strip-components: 1
       delete: true
 
+
+  # Fixes the recent Go crypto vulnerability by upgrading to v0.45.0
   - name: "Update Go dependencies"
     runs: |
       cd terraform-provider-hcloud
@@ -53,7 +61,11 @@ pipeline:
     with:
       modroot: terraform-provider-hcloud
       packages: .
-      ldflags: "-s"
+      ldflags: |
+            -s
+            -X github.com/<your-module-path>/Version=${{package.version}}
+            -X github.com/<your-module-path>/Commit=${{vars.git_commit}}
+
       output: terraform-provider-hcloud
 
   - uses: strip
