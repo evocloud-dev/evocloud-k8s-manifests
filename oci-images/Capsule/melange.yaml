@@ -32,7 +32,9 @@ environment:
       #- go
 
 vars:
-  git_commit: "dd5b3df95ad723ebf9a93474c0f91d13e1b9e53d"
+  git_repo: "https://github.com/projectcapsule/capsule"
+  build_time: "2025-12-02T10:43:32Z"
+
 
 pipeline:
   - name: "Prepare extraction directory"
@@ -58,13 +60,12 @@ pipeline:
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0
       ldflags: |
-        -s
-        -X main.Version=${{package.version}}
-        -X main.GitCommit=${{vars.git_commit}}
-        -X main.GitTag={{.Tag}}
-        -X main.GitDirty={{.Date }
-        -X main.BuildTime={{.Date}}
-        -X main.GitRepo={{.ProjectName}}
+             -s
+             -X main.Version=${{package.version}}
+             -X main.GitTag=${{package.version}}
+             -X main.GitDirty=${{vars.build_time}}
+             -X main.BuildTime=${{vars.build_time}}
+             -X main.GitRepo=${{vars.git_repo}}
       output: capsule
 
 

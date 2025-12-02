@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Source: https://github.com/crossplane/crossplane
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
-# Reference: https://github.com/crossplane/crossplane/tree/main/cmd
+# Reference: https://github.com/crossplane/crossplane/blob/main/Earthfile
 package:
   name: crossplane-all-in-one
   version: 2.1.1   
