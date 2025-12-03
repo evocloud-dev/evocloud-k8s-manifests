@@ -13,7 +13,7 @@ contents:
     - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     - ./melange.rsa.pub
   packages:
-    - cli-kubectl-kyverno@local   
+    - kubectl-kyverno@local   
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
@@ -41,7 +41,7 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bin/cli-kubectl-kyverno 
+  command: /usr/bin/kubectl-kyverno 
   shell-fragment: ""
   services: {}
 

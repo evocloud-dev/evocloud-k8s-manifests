@@ -4,10 +4,10 @@
 # Reference: https://github.com/kyverno/kyverno/blob/main/Makefile
 
 package:
-  name: cli-kubectl-kyverno
+  name: kubectl-kyverno
   version: 1.16.0
   epoch: 1
-  description: "Kyverno: Kubernetes Native Policy Management"
+  description: "Kyverno Kubectl Plugin"
   target-architecture:
     - x86_64
   copyright:
@@ -25,47 +25,35 @@ environment:
       - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     packages:
       - ca-certificates-bundle
-      # - go
-      # - git
-      # - make
-
 
 pipeline:
   - name: "Prepare extraction directory"
     runs: |
-      mkdir -p cli-kubectl-kyverno
-
+      mkdir -p kubectl-kyverno
 
   - name: "Download Kyverno source"
     uses: fetch
     with:
       uri: https://github.com/kyverno/kyverno/archive/refs/tags/v${{package.version}}.tar.gz
       expected-sha512: 2c57c73de8b85c3ec80fd8568b83250214069489b7dc7437418f39c29866dd5e9c928ff2be15b65fd4f0f00b8002e9288946dfee9efbb5f62cdc97adc0de8042
-      directory: cli-kubectl-kyverno
+      directory: kubectl-kyverno
       delete: true
 
-
-
-
-  - name: "Build Kubectl-Kyverno"
+  - name: "Build kubectl-kyverno"
     uses: go/build
     with:
-      modroot: cli-kubectl-kyverno
+      modroot: kubectl-kyverno
       packages: ./cmd/cli/kubectl-kyverno
-      # secfixes:
-      #   1.16.0-r1:
-      #     - GHSA-j5w8-q4qc-rx2x
-      #     - GHSA-f6x5-jh6r-wrfv
+      #secfixes:
+        #1.16.0-r1:
+          #- GHSA-j5w8-q4qc-rx2x
+          #- GHSA-f6x5-jh6r-wrfv
       deps: golang.org/x/crypto@v0.45.0
       ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
-        
-      output: cli-kubectl-kyverno
-
-
-
+      output: kubectl-kyverno
 
   - uses: strip
 
   - name: "Cleanup"
     runs: |
-      rm -rf cli-kubectl-kyverno
+      rm -rf kubectl-kyverno
