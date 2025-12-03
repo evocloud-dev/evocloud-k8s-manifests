@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# Source: https://github.com/hetznercloud/terraform-provider-hcloud
+# Reference: https://github.com/hetznercloud/terraform-provider-hcloud/blob/main/.goreleaser.yml
+
+package:
+  name: terraform-provider-hcloud
+  version: 1.56.0
+  epoch: 1
+  description: "The Terraform Hetzner Cloud provider allows Terraform to manage resources on Hetzner Cloud."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      #- go
+
+vars:
+  git_commit: "dc14c303f6a252d84712c2b9c3ea9d530f4053f0"
+
+
+pipeline:
+  - name: "CREATE TERRAFORM HETZNER PROVIDER DIR"
+    runs: |
+      mkdir terraform-provider-hcloud
+
+  - name: "DOWNLOAD TERRAFORM PROVIDER HETZNER SOURCE"
+    uses: fetch
+    with:
+      uri: https://github.com/hetznercloud/terraform-provider-hcloud/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 9b703b3bb3750bc4bed9dd940cbbfc3de754c242ec943da95e556b693abbd1edf65f8c32f244e58ef3a6b31a8083153b04f23f3a21af4620528f76d3eb953d69 
+      directory: terraform-provider-hcloud
+      strip-components: 1
+      delete: true
+
+
+  # Fixes the recent Go crypto vulnerability by upgrading to v0.45.0
+  - name: "Update Go dependencies"
+    runs: |
+      cd terraform-provider-hcloud
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+
+  - name: "BUILD TERRAFORM HETZNER PROVIDER BINARY"
+    uses: go/build
+    with:
+      modroot: terraform-provider-hcloud
+      packages: .
+      ldflags: |
+            -s
+            -X github.com/<your-module-path>/Version=${{package.version}}
+            -X github.com/<your-module-path>/Commit=${{vars.git_commit}}
+
+      output: terraform-provider-hcloud
+
+  - uses: strip
+
+  - name: "CLEAN UP"
+    runs: |
+      rm -rf terraform-provider-hcloud

@@ -1,0 +1,50 @@
+#SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+#Source:
+#Ref: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
+#Schema: https://github.com/chainguard-dev/apko/blob/51830a2e043ace2da4eba4265083b2e3298437a8/pkg/build/types/schema.json
+
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+    - '@local /work/packages'
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    - ./melange.rsa.pub
+  packages:
+    - cert-manager-all-in-one@local
+
+annotations:
+  org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
+  org.opencontainers.image.title: Cert-manager ( acmesolver + cainjector + controller + startupapicheck + webhook) (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE free Cert-manager OCI image
+  org.opencontainers.image.source: https://github.com/cert-manager/cert-manager
+  org.opencontainers.image.licenses: Apache-2.0
+  org.opencontainers.image.vendor: EvoCloud
+  org.opencontainers.image.version: "1.19.1"
+
+accounts:
+  groups:
+    - groupname: nonroot
+      gid: 65510
+      members: []
+  users:
+    - username: nonroot
+      uid: 65510
+      shell: /bin/false
+      #homedir: /dev/null
+  run-as: nonroot
+
+environment:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+
+entrypoint:
+  type: ""
+  command: /usr/bash #--entrypoint= acmesolver --entrypoint=cainjector --entrypoint=controller --entrypoint=startupapicheck  --entrypoint=webhook  
+  shell-fragment: ""
+  services: {}
+ 
+
+archs:
+  - amd64

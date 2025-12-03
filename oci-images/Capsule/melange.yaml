@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Source: https://github.com/kubernetes-sigs/external-dns
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/projectcapsule/capsule/blob/main/.goreleaser.yml
+package:
+  name: capsule
+  version: 0.11.1
+  epoch: 1
+  description: "Multi-tenancy and policy-based framework for Kubernetes."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/projectcapsule/capsule"
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      #- busybox
+      #- go
+
+vars:
+  git_repo: "https://github.com/projectcapsule/capsule"
+  build_time: "2025-12-02T10:43:32Z"
+
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p capsule
+
+  - name: "Download Capsule source"
+    uses: fetch
+    with:
+      uri: https://github.com/projectcapsule/capsule/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: c9c3c96527b4054f6e7320b1d38909860dfdc06f7d046dc5d41496040a6677263b905bbca3c7d0ec73deac858ec0a22af3a3bf469142c9be40811a430f1809f4 
+      directory: capsule
+      delete: true
+
+  - name: "Build Capsule"
+    uses: go/build
+    with:
+      modroot: capsule
+      packages: ./cmd
+      # secfixes:
+      #   0.11.1-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: |
+             -s
+             -X main.Version=${{package.version}}
+             -X main.GitTag=${{package.version}}
+             -X main.GitDirty=${{vars.build_time}}
+             -X main.BuildTime=${{vars.build_time}}
+             -X main.GitRepo=${{vars.git_repo}}
+      output: capsule
+
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf capsule

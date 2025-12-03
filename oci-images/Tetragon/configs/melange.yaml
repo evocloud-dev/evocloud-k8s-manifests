@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Source: https://github.com/openkruise/kruise
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/cilium/tetragon/blob/main/Makefile
+
+package:
+  name: tetragon-all-in-one
+  version: 1.6.0
+  epoch: 0
+  description: "eBPF-based Security Observability and Runtime Enforcement."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/cilium/tetragon"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      # - busybox
+      # - go
+      # - git
+      # - make
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p tetragon
+
+  - name: "Download OpenKruise source"
+    uses: fetch
+    with:
+      uri: https://github.com/cilium/tetragon/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 0f92941da4d8852ac64d96950a5c6cbdb3a85374c730f337015bad29163fb98a32527b9bf9c8e8c219118c05bcbaeae5874fccfe5eeae7471954cb8d544b2a9c 
+      directory: tetragon
+      delete: true
+
+  
+
+  - name: "Build Tetra"
+    uses: go/build
+    with:
+      modroot: tetragon
+      packages: ./cmd/tetra
+      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=${{package.version}}"
+      output: tetra
+
+  - name: "Build Tetra-metrics-docs"
+    uses: go/build
+    with:
+      modroot: tetragon
+      packages: ./cmd/tetragon-metrics-docs
+      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=${{package.version}}"
+      output: tetragon-metrics-docs
+
+  - name: "Build Tetragon"
+    uses: go/build
+    with:
+      modroot: tetragon
+      packages: ./cmd/tetragon
+      ldflags: "-s -X github.com/cilium/tetragon/pkg/version.Version=${{package.version}}"
+      output: tetragon
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf tetragon
+

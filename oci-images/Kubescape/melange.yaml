@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# Source: https://github.com/kubescape/kubescape
+# Reference: https://github.com/kubescape/kubescape/blob/master/.goreleaser.yaml
+package:
+  name: kubescape
+  version: 3.0.45
+  epoch: 1
+  description: "Kubernetes cluster scanner"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubescape/kubescape"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "CREATING KUBESCAPE DIR"
+    runs: |
+      mkdir kubescape
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING KUBESCAPE SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/kubescape/kubescape/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: b5f2a5996869fc263995ea3e12036868e4fa5e20a39f27b3070df51aedd93d886478e292c821775b3511849c82667c17a3def43faa412c25976f2ce3b700491b
+      directory: kubescape
+      delete: true
+
+
+  - name: "BUILDING KUBESCAPE BINARY"
+    uses: go/build
+    with:
+      modroot: kubescape
+      packages: .
+      # secfixes:
+      #   3.0.45-r1:
+      #     - GHSA-6gxw-85q2-q646
+      deps: github.com/anchore/grype@v0.104.1 
+      ldflags:
+        -s -X https://github.com/kubescape/kubescape/v3/core/cautils.BuildNumber=${{package.version}}
+      output: kubescape
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf kubescape

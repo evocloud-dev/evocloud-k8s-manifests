@@ -1,0 +1,88 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Source: https://github.com/kedacore/keda
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/kedacore/keda/blob/main/Makefile
+package:
+  name: keda-all-in-one
+  version: 2.18.1
+  epoch: 1
+  description: "KEDA is a Kubernetes-based Event Driven Autoscaler. With KEDA, you can drive the scaling of any container in Kubernetes based on the number of events needing to be processed."
+  target-architecture:
+    - x86_64
+    # - aarch64
+  url: "https://keda.sh/"
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      #- busybox
+      #- go
+      #- git
+      #- make
+
+vars:
+  git_commit: "3f590ba6027a67b2d6f79ece605061f6d201c54b"
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p keda
+
+  - name: "Download KEDA source"
+    uses: fetch
+    with:
+      uri: https://github.com/kedacore/keda/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 0f047af7438e9959f1b0b62fc30b128ea0b81dab759df62faccf68e1d56ab4a99c338ad8cb90bafd04f39ba511088b495dac19ef72f43e19e338022add6203c2 
+      directory: keda
+      delete: true
+
+      
+ # Fixes security vulnerability GHSA-f6x5-jh6r-wrfv in golang.org/x/crypto 
+  - name: "Update Go dependencies"
+    runs: |
+      cd keda
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+
+  - name: "Build KEDA Operator"
+    uses: go/build
+    with:
+      modroot: keda
+      packages: ./cmd/operator
+      ldflags: "-s -X 'github.com/kedacore/keda/v2/version.Version=${{package.version}}' -X 'github.com/kedacore/keda/v2/version.GitCommit=${{vars.git_commit}}'"
+      output: keda
+
+  - name: "Build KEDA Metrics Server"
+    uses: go/build
+    with:
+      modroot: keda
+      packages: ./cmd/adapter
+      ldflags: "-s -X 'github.com/kedacore/keda/v2/version.Version=${{package.version}}' -X 'github.com/kedacore/keda/v2/version.GitCommit=${{vars.git_commit}}'"
+      output: keda-adapter
+
+  - name: "Build KEDA Admission Webhooks"
+    uses: go/build
+    with:
+      modroot: keda
+      packages: ./cmd/webhooks
+      ldflags: "-s -X 'github.com/kedacore/keda/v2/version.Version=${{package.version}}' -X 'github.com/kedacore/keda/v2/version.GitCommit=${{vars.git_commit}}'"
+      output: keda-admission-webhooks
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf keda

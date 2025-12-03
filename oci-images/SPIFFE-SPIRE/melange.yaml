@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# Reference: https://github.com/spiffe/spire/blob/main/Makefile
+# Source: https://github.com/spiffe/spire
+
+package:
+  name: spire-all-in-one
+  version: 1.13.3
+  epoch: 1
+  description: "SPIRE is a production-ready implementation of the SPIFFE standard for establishing trust between software services across a network."
+  target-architecture:
+    - x86_64
+    #- aarch64
+  url: "https://spiffe.io/spire/"
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "191c76b489656502ff946afb486b47b83a376e81"  
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p spire
+
+  - name: "Download SPIRE source"
+    uses: fetch
+    with:
+      uri: https://github.com/spiffe/spire/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 80d1cae29c1cc499361dc77aca2533c4b4f8932e0e157ba70fd8747df0cce8e9a3a383c0da201e51f14cb9e8a61a06d137a4dd36f0395a712e404a30b21b10b2 
+      directory: spire
+      delete: true
+
+  - name: "Build SPIRE Server"
+    uses: go/build
+    with:
+      modroot: spire
+      packages: ./cmd/spire-server
+      # secfixes:
+      #   1.13.3-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0  
+      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
+      output: spire-server
+
+  - name: "Build SPIRE Agent"
+    uses: go/build
+    with:
+      modroot: spire
+      packages: ./cmd/spire-agent
+      # secfixes:
+      #   1.13.3-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0  
+      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
+      output: spire-agent
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf spire
+
