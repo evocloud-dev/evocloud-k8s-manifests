@@ -7,7 +7,7 @@ package:
   name: kyverno-background-controller
   version: 1.16.0
   epoch: 0
-  description: "Kyverno: Kubernetes Native Policy Management"
+  description: "Kyverno Background Controller"
   target-architecture:
     - x86_64
   copyright:
@@ -25,43 +25,37 @@ environment:
       - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     packages:
       - ca-certificates-bundle
-      # - go
-      # - git
-      # - make
-
 
 pipeline:
   - name: "Prepare extraction directory"
     runs: |
-      mkdir -p kyverno-background-controller
-
+      mkdir -p background-controller
 
   - name: "Download Kyverno source"
     uses: fetch
     with:
       uri: https://github.com/kyverno/kyverno/archive/refs/tags/v${{package.version}}.tar.gz
       expected-sha512: 2c57c73de8b85c3ec80fd8568b83250214069489b7dc7437418f39c29866dd5e9c928ff2be15b65fd4f0f00b8002e9288946dfee9efbb5f62cdc97adc0de8042
-      directory: kyverno-background-controller
+      directory: background-controller
       delete: true
 
-
-
-  - name: "Build Background-controller"
+  - name: "Build Background Controller"
     uses: go/build
     with:
-      modroot: kyverno-background-controller
+      modroot: background-controller
       packages: ./cmd/background-controller
       # secfixes:
       #   1.16.0-r1:
       #     - GHSA-j5w8-q4qc-rx2x
       #     - GHSA-f6x5-jh6r-wrfv
       deps: golang.org/x/crypto@v0.45.0
-      ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
-        
+      ldflags: |
+        -s -w -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
+        -X github.com/kyverno/kyverno/pkg/version.GitCommit={{.Commit}}
       output: kyverno-background-controller
 
   - uses: strip
 
   - name: "Cleanup"
     runs: |
-      rm -rf kyverno-background-controller
+      rm -rf background-controller

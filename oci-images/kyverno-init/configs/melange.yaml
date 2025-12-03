@@ -29,12 +29,10 @@ environment:
       # - git
       # - make
 
-
 pipeline:
   - name: "Prepare extraction directory"
     runs: |
       mkdir -p kyverno-init
-
 
   - name: "Download Kyverno source"
     uses: fetch
@@ -43,9 +41,6 @@ pipeline:
       expected-sha512: 2c57c73de8b85c3ec80fd8568b83250214069489b7dc7437418f39c29866dd5e9c928ff2be15b65fd4f0f00b8002e9288946dfee9efbb5f62cdc97adc0de8042
       directory: kyverno-init
       delete: true
-
-
-
 
   - name: "Build Kyverno-init"
     uses: go/build
@@ -60,8 +55,6 @@ pipeline:
       ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
   
       output: kyverno-init
-
-
 
   - uses: strip
 
