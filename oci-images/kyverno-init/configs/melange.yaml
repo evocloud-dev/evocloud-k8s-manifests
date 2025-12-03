@@ -4,10 +4,10 @@
 # Reference: https://github.com/kyverno/kyverno/blob/main/Makefile
 
 package:
-  name: kyverno-init
+  name: kyvernopre
   version: 1.16.0
-  epoch: 0
-  description: "Kyverno: Kubernetes Native Policy Management"
+  epoch: 1
+  description: "Kyverno Pre-init Binary"
   target-architecture:
     - x86_64
   copyright:
@@ -25,16 +25,11 @@ environment:
       - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     packages:
       - ca-certificates-bundle
-      # - go
-      # - git
-      # - make
-
 
 pipeline:
   - name: "Prepare extraction directory"
     runs: |
       mkdir -p kyverno-init
-
 
   - name: "Download Kyverno source"
     uses: fetch
@@ -44,10 +39,7 @@ pipeline:
       directory: kyverno-init
       delete: true
 
-
-
-
-  - name: "Build Kyverno-init"
+  - name: "Build Kyvernopre"
     uses: go/build
     with:
       modroot: kyverno-init
@@ -58,10 +50,7 @@ pipeline:
       #     - GHSA-f6x5-jh6r-wrfv
       deps: golang.org/x/crypto@v0.45.0
       ldflags: "-s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}"
-  
-      output: kyverno-init
-
-
+      output: kyvernopre
 
   - uses: strip
 
