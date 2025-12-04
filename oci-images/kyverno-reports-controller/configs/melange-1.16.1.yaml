@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/kyverno/kyverno
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/kyverno/kyverno/blob/main/Makefile
+
+package:
+  name: kyverno-reports-controller
+  version: 1.16.1
+  epoch: 1
+  description: "Kyverno is a Kubernetes Native Policy Management Engine Toolkit"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kyverno/kyverno"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: 67f7f8c3f58d64e3c7b103de5f11ffe268250c55
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KYVERNO SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kyverno/kyverno
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "BUILDING KYVERNO-REPORTS-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/reports-controller
+      # secfixes:
+      #   1.16.1-r1:
+      #     - GHSA-j5w8-q4qc-rx2x
+      #     - GHSA-f6x5-jh6r-wrfv
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: |
+        -s -X github.com/kyverno/kyverno/pkg/version.BuildVersion=${{package.version}}
+      output: reports-controller
+
+  - uses: strip #Strip debugging symbols
+
+update:
+  enabled: true
+  github:
+    identifier: kyverno/kyverno
+    strip-prefix: v
