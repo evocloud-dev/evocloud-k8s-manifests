@@ -13,12 +13,12 @@ contents:
     - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     - ./melange.rsa.pub
   packages:
-    - kyverno-background-controller@local
+    - kyvernopre@local
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Kyverno-background-controller (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE free Kyverno-background-controller OCI image
+  org.opencontainers.image.title: Kyvernopre aka kyverno-init (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE free Kyvernopre OCI image
   org.opencontainers.image.source: https://github.com/kyverno/kyverno
   org.opencontainers.image.licenses: Apache-2.0
   org.opencontainers.image.vendor: EvoCloud
@@ -41,7 +41,7 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bin/background-controller
+  command: /usr/bin/kyvernopre
   shell-fragment: ""
   services: {}
 
