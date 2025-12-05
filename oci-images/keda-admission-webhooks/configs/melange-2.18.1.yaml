@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: Apache-2.0
-
 # Source: https://github.com/kedacore/keda
 # Reference: https://github.com/kedacore/keda/blob/main/Makefile
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
@@ -37,36 +36,45 @@ vars:
   git_commit: "3f590ba6027a67b2d6f79ece605061f6d201c54b"
 
 pipeline:
-  - name: "Prepare extraction directory"
+  - name: "CREATING KEDA-ADMISSION-WEBHOOKS DIR"
     runs: |
-      mkdir -p keda-admission-webhooks
+      mkdir keda-admission-webhooks
 
-  - name: "Download KEDA source"
+  - name: "DOWNLOADING KEDA SOURCE"
     uses: fetch
     with:
       uri: https://github.com/kedacore/keda/archive/refs/tags/v${{package.version}}.tar.gz
-      expected-sha512: 0f047af7438e9959f1b0b62fc30b128ea0b81dab759df62faccf68e1d56ab4a99c338ad8cb90bafd04f39ba511088b495dac19ef72f43e19e338022add6203c2 
+      expected-sha512: 0f047af7438e9959f1b0b62fc30b128ea0b81dab759df62faccf68e1d56ab4a99c338ad8cb90bafd04f39ba511088b495dac19ef72f43e19e338022add6203c2
       directory: keda-admission-webhooks
       delete: true
 
-# Fix inconsistent vendoring and mitigate known vulnerability
-  - name: "Update Go dependencies"
+  # secfixes:
+  #   2.18.1-r1:
+  #     - GHSA-f6x5-jh6r-wrfv
+  - name: "PATCHING DO DEPENDENCIES"
     runs: |
       cd keda-admission-webhooks
       go get golang.org/x/crypto@v0.45.0
       go mod tidy
-      go mod vendor     
+      go mod vendor
 
-  - name: "Build KEDA Admission Webhooks"
+  - name: "BUILDING KEDA-METRICS-SERVER"
     uses: go/build
     with:
       modroot: keda-admission-webhooks
-      packages: ./cmd/webhooks   
+      packages: ./cmd/webhooks
       ldflags: "-s -X 'github.com/kedacore/keda/v2/version.Version=${{package.version}}' -X 'github.com/kedacore/keda/v2/version.GitCommit={{vars.git_commit}}'"
-      output: keda-admission-webhooks 
+      output: keda-admission-webhooks
 
   - uses: strip
 
-  - name: "Cleanup"
+  - name: "REMOVING DETRITUS"
     runs: |
       rm -rf keda-admission-webhooks
+
+update:
+  enabled: true
+  github:
+    identifier: kedacore/keda
+    strip-prefix: v
+    use-tag: true
