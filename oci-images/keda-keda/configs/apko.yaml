@@ -17,8 +17,8 @@ contents:
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Keda-Operator (Packaged by EvoCloud)
-  org.opencontainers.image.description: Kubernetes-based Event Driven Autoscaler packaged with all components
+  org.opencontainers.image.title: Keda Operator (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near Zero CVE-free Keda OCI image
   org.opencontainers.image.source: https://github.com/kedacore/keda
   org.opencontainers.image.licenses: Apache-2.0
   org.opencontainers.image.vendor: EvoCloud
@@ -44,7 +44,6 @@ entrypoint:
   command: /usr/bin/keda
   shell-fragment: ""
   services: {}
- 
 
 archs:
   - amd64
