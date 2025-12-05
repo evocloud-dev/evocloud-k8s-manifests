@@ -41,10 +41,9 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bash #--entrypoint=keda --entrypoint=keda-adapter --entrypoint=keda-admission-webhooks
+  command: /usr/bash #--entrypoint=keda --entrypoint=keda-metrics-apiserver --entrypoint=keda-admission-webhooks
   shell-fragment: ""
   services: {}
- 
 
 archs:
   - amd64

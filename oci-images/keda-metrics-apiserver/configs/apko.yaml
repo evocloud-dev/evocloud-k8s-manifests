@@ -17,8 +17,8 @@ contents:
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: KEDA-metrics-apiserver (Packaged by EvoCloud)
-  org.opencontainers.image.description: Kubernetes-based Event Driven Autoscaler packaged with all components
+  org.opencontainers.image.title: KEDA adapter aka keda-metrics-apiserver (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE free keda-metrics-apiserver OCI image
   org.opencontainers.image.source: https://github.com/kedacore/keda
   org.opencontainers.image.licenses: Apache-2.0
   org.opencontainers.image.vendor: EvoCloud
@@ -41,10 +41,9 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bin/keda-adapter
+  command: /usr/bin/keda-metrics-apiserver
   shell-fragment: ""
   services: {}
- 
 
 archs:
   - amd64
