@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/opencost/opencost
+# Reference: https://github.com/kube-burner/kube-burner/blob/main/Makefile  https://github.com/kube-burner/kube-burner/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: kube-burner
+  version: 2.0.0 
+  epoch: 1
+  description: "Kubernetes performance and scale test orchestration framework written in golang"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: Apache-2.0
+  url: "https://github.com/kube-burner/kube-burner"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "432ffd2ff43532e0540dc03874763b9981a375c5"
+  build_date: "2025-12-09T11:53:35Z"
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p kube-burner
+
+  - name: "Download Kube-burner source"
+    uses: fetch
+    with:
+      uri: https://github.com/kube-burner/kube-burner/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 6eacbb01fba964d166bdfb592bef0ba1efc04f7cfdffe5f414504831686e3d8aa4caaa558a2b73690678396d6549de493d1a1a2be2663d467bb027122975da61
+      directory: kube-burner
+      delete: true
+
+  - name: "Build kube-burner"
+    uses: go/build
+    with:
+      modroot: kube-burner                  
+      packages: ./cmd/kube-burner 
+      # secfixes:
+      #   0.11.1-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: |
+           -s
+           -X github.com/cloud-bulldozer/go-commons/v2/version.Version=${{package.version}}
+           -X github.com/cloud-bulldozer/go-commons/v2/version.GitCommit=${{vars.git_commit}}
+           -X github.com/cloud-bulldozer/go-commons/v2/version.BuildDate=${{vars.build_date}}
+      output: kube-burner
+
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf kube-burner
+
