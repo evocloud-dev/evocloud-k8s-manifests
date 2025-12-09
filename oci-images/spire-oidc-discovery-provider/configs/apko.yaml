@@ -17,8 +17,8 @@ contents:
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: SPIRE Oidc-discovery-provider (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE free Spire Oidc-discovery-provider OCI image
+  org.opencontainers.image.title: SPIRE OIDC-Discovery-Provider (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near Zero CVE free SPIRE OIDC-Discovery-Provider OCI image
   org.opencontainers.image.source: https://github.com/spiffe/spire
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
