@@ -57,8 +57,8 @@ pipeline:
       deps: golang.org/x/crypto@v0.45.0
       ldflags: |
           -s
-          -X github.com/cert-manager/cert-manager/pkg/util/version.GitVersion=${{package.version}}
-          -X github.com/cert-manager/cert-manager/pkg/util/version.GitCommit={{vars.git_commit}}
+          -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+          -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
       output: acmesolver
 
 
@@ -76,8 +76,8 @@ pipeline:
       deps: golang.org/x/crypto@v0.45.0
       ldflags: |
            -s
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitVersion=${{package.version}}
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitCommit={{vars.git_commit}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
       output: cainjector
 
   - name: "Build Controller"
@@ -94,8 +94,8 @@ pipeline:
       deps: golang.org/x/crypto@v0.45.0
       ldflags: |
            -s
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitVersion=${{package.version}}
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitCommit={{vars.git_commit}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
       output: controller   
 
   - name: "Build Startupapicheck"
@@ -112,8 +112,8 @@ pipeline:
       deps: golang.org/x/crypto@v0.45.0
       ldflags: |
            -s
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitVersion=${{package.version}}
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitCommit={{vars.git_commit}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
       output: startupapicheck
 
 
@@ -131,8 +131,8 @@ pipeline:
       deps: golang.org/x/crypto@v0.45.0
       ldflags: |
            -s
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitVersion=${{package.version}}
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitCommit={{vars.git_commit}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
       output: webhook   
 
 

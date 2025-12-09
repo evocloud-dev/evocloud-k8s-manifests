@@ -60,8 +60,8 @@ pipeline:
       deps: golang.org/x/crypto@v0.45.0 
       ldflags: |
            -s
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitVersion=${{package.version}}
-           -X github.com/cert-manager/cert-manager/pkg/util/version.GitCommit={{vars.git_commit}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
       output: webhook   
 
 

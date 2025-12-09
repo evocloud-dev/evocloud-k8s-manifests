@@ -59,8 +59,8 @@ pipeline:
       packages: .
       ldflags: |
           -s
-          -X github.com/cert-manager/cert-manager/pkg/util/version.GitVersion=${{package.version}}
-          -X github.com/cert-manager/cert-manager/pkg/util/version.GitCommit=${{vars.git_commit}}
+          -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+          -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
       output: acmesolver
 
   - uses: strip
