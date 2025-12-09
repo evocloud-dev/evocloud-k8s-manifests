@@ -3,11 +3,12 @@
 #
 # Source: https://github.com/spiffe/spire
 # Reference: https://github.com/spiffe/spire/blob/main/Makefile
+
 package:
-  name: spire-server
+  name: spire-agent
   version: 1.13.3
   epoch: 1
-  description: "The SPIRE Server is the central authority in a SPIRE deployment."
+  description: "The SPIRE Agent runs on nodes within a SPIRE deployment. It attests workloads, retrieves SPIFFE IDs and SVIDs from the SPIRE Server, and securely delivers identities to applications and services"
   target-architecture:
     - x86_64
     #- aarch64
@@ -31,24 +32,23 @@ vars:
   git_commit: "191c76b489656502ff946afb486b47b83a376e81"  
 
 pipeline:
-  - name: "Prepare extraction directory"
+  - name: "CREATING SPIRE-AGENT DIR"
     runs: |
-      mkdir -p spire-server
+      mkdir spire-agent
 
-  - name: "Download SPIRE source"
+  - name: "DOWNLOADING SPIRE-AGENT SOURCE CODE"
     uses: fetch
     with:
       uri: https://github.com/spiffe/spire/archive/refs/tags/v${{package.version}}.tar.gz
       expected-sha512: 80d1cae29c1cc499361dc77aca2533c4b4f8932e0e157ba70fd8747df0cce8e9a3a383c0da201e51f14cb9e8a61a06d137a4dd36f0395a712e404a30b21b10b2 
-      directory: spire-server
+      directory: spire-agent
       delete: true
 
-
-  - name: "Build SPIRE Server"
+  - name: "BUILDING SPIRE-AGENT"
     uses: go/build
     with:
-      modroot: spire-server
-      packages: ./cmd/spire-server
+      modroot: spire-agent
+      packages: ./cmd/spire-agent
       # secfixes:
       #   1.13.3-r1:
       #     - GHSA-f6x5-jh6r-wrfv
@@ -56,12 +56,21 @@ pipeline:
       #     - CVE-2025-58181
       #     - CVE-2025-47914 
       deps: golang.org/x/crypto@v0.45.0 
-      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
-      output: spire-server
+      ldflags: |
+        -s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} 
+        -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}
+        -extldflags "-static"
+      output: spire-agent
 
   - uses: strip
 
-  - name: "Cleanup"
+  - name: "REMOVING DETRITUS"
     runs: |
-      rm -rf spire-server
+      rm -rf spire-agent
+
+update:
+  enabled: true
+  github:
+    identifier: spiffe/spire
+    strip-prefix: v
 
