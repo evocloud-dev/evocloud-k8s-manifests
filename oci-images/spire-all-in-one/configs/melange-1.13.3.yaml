@@ -31,11 +31,11 @@ vars:
   git_commit: "191c76b489656502ff946afb486b47b83a376e81"  
 
 pipeline:
-  - name: "Prepare extraction directory"
+  - name: "CREATING SPIRE DIR"
     runs: |
-      mkdir -p spire
+      mkdir spire
 
-  - name: "Download SPIRE source"
+  - name: "DOWNLOADING SPIRE SOURCE CODE"
     uses: fetch
     with:
       uri: https://github.com/spiffe/spire/archive/refs/tags/v${{package.version}}.tar.gz
@@ -43,7 +43,7 @@ pipeline:
       directory: spire
       delete: true
 
-  - name: "Build SPIRE Server"
+  - name: "BUILDING SPIRE-SERVER"
     uses: go/build
     with:
       modroot: spire
@@ -53,10 +53,13 @@ pipeline:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
       deps: golang.org/x/crypto@v0.45.0  
-      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
+      ldflags: |
+        -s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} 
+        -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}
+        -extldflags "-static"
       output: spire-server
 
-  - name: "Build SPIRE Agent"
+  - name: "BUILDING SPIRE-AGENT"
     uses: go/build
     with:
       modroot: spire
@@ -65,13 +68,41 @@ pipeline:
       #   1.13.3-r1:
       #     - GHSA-f6x5-jh6r-wrfv
       #     - GHSA-j5w8-q4qc-rx2x 
-      deps: golang.org/x/crypto@v0.45.0  
-      ldflags: "-s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}"
+      #     - CVE-2025-58181
+      #     - CVE-2025-47914 
+      deps: golang.org/x/crypto@v0.45.0 
+      ldflags: |
+        -s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} 
+        -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}
+        -extldflags "-static"
       output: spire-agent
+
+  - name: "BUILDING SPIRE-OIDC-DISCOVERY-PROVIDER"
+    uses: go/build
+    with:
+      modroot: spire
+      packages: ./support/oidc-discovery-provider
+      # secfixes:
+      #   1.13.3-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - CVE-2025-58181
+      #     - CVE-2025-47914 
+      deps: golang.org/x/crypto@v0.45.0 
+      ldflags: |
+        -s -X github.com/spiffe/spire/pkg/common/version.gittag=${{package.version}} 
+        -X github.com/spiffe/spire/pkg/common/version.githash=${{vars.git_commit}}
+        -extldflags "-static"
+      output: oidc-discovery-provider
 
   - uses: strip
 
-  - name: "Cleanup"
+  - name: "REMOVING DETRITUS"
     runs: |
       rm -rf spire
 
+update:
+  enabled: true
+  github:
+    identifier: spiffe/spire
+    strip-prefix: v
