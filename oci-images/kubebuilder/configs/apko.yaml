@@ -33,7 +33,6 @@ accounts:
     - username: nonroot
       uid: 65510
       shell: /bin/false
-      homedir: /dev/null
   run-as: nonroot
 
 environment:
