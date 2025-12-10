@@ -4,7 +4,6 @@
 # Ref: https://github.com/kube-burner/kube-burner
 # Schema: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
 
-
 contents:
   repositories:
     - https://packages.wolfi.dev/os
@@ -17,8 +16,8 @@ contents:
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Kube-burne (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE-free Kube-burne OCI image
+  org.opencontainers.image.title: Kube-burner (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free Kube-burner OCI image
   org.opencontainers.image.source: https://github.com/kube-burner/kube-burner
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
@@ -33,7 +32,6 @@ accounts:
     - username: nonroot
       uid: 65510
       shell: /bin/false
-      homedir: /dev/null
   run-as: nonroot
 
 environment:
@@ -44,5 +42,3 @@ entrypoint:
 
 archs:
   - amd64
-
-
