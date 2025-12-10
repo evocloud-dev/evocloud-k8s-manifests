@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/cert-manager/cert-manager
+# Reference: https://github.com/cert-manager/cert-manager/blob/master/make/00_mod.mk
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: webhook
+  version: 1.19.1
+  epoch: 1
+  description: "cert-manager-webhook is a core component of the cert-manager software for Kubernetes that provides dynamic admission control, validation, and conversion of cert-manager resources."
+  target-architecture:
+    - x86_64 
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/cert-manager/cert-manager"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      # - busybox
+      # - go
+      # - git
+      # - make
+
+vars:
+  git_commit: "a22e21ea38f6a8e031af99471b0a50287fed8e7f"
+ 
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p cert-manager-webhook
+
+  - name: "Download Cert-manager source"
+    uses: fetch
+    with:
+      uri: https://github.com/cert-manager/cert-manager/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 71fc298e7650ab7cd30b97d919897a16a03d804f91dc72dbafa01b142a15edd33f171b3336767032d0c0ab864c8c518531d31784ad881fb5e0bf99b67f04c052
+      directory: cert-manager-webhook
+      delete: true
+
+  - name: "Build Cert-manager Webhook"
+    uses: go/build
+    with:
+      modroot: cert-manager-webhook/cmd/webhook
+      packages: . 
+      # secfixes:
+      #   1.19.1-r1:
+      #     - GHSA-j5w8-q4qc-rx2x
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - CVE-2025-61729 
+      #     - CVE-2025-61727
+      deps: golang.org/x/crypto@v0.45.0 
+      ldflags: |
+           -s
+           -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+           -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
+      output: webhook   
+
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf cert-manager-webhook
+

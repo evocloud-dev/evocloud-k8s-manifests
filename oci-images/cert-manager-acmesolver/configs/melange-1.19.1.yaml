@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/cert-manager/cert-manager
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/cert-manager/cert-manager/blob/master/make/00_mod.mk
+
+package:
+  name: acmesolver
+  version: 1.19.1
+  epoch: 1
+  description: "Automatically provision and manage TLS certificates in Kubernetes."
+  target-architecture:
+    - x86_64 
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/cert-manager/cert-manager"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      
+
+vars:
+  git_commit: a22e21ea38f6a8e031af99471b0a50287fed8e7f
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING CERT-MANAGER SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/cert-manager/cert-manager
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.19.1-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    #     - CVE-2025-61729
+    #     - CVE-2025-61727
+    runs: |
+      cd ./cmd/acmesolver
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+
+  - name: "Build Acmesolver"
+    uses: go/build
+    with:
+      modroot: ./cmd/acmesolver
+      packages: .
+      ldflags: |
+          -s
+          -X github.com/cert-manager/cert-manager/pkg/util.AppVersion=${{package.version}}
+          -X github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${{vars.git_commit}}
+      output: acmesolver
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: cert-manager/cert-manager
+    strip-prefix: v
