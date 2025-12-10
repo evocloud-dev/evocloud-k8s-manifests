@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Source: https://github.com/kube-burner/kube-burner
-# Reference: https://github.com/kube-burner/kube-burner/blob/main/Makefile  https://github.com/kube-burner/kube-burner/blob/main/.goreleaser.yml
+# Reference: https://github.com/kube-burner/kube-burner/blob/main/Makefile  
+#            https://github.com/kube-burner/kube-burner/blob/main/.goreleaser.yml
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
 
 package:
