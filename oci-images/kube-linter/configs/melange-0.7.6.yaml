@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/stackrox/kube-linter
+# Reference: https://github.com/stackrox/kube-linter/blob/main/.goreleaser.yaml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name:  kube-linter
+  version: 0.7.6
+  epoch: 1
+  description: "KubeLinter is a static analysis tool that checks Kubernetes YAML files and Helm charts to ensure the applications represented in them adhere to best practices."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/stackrox/kube-linter"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p  kube-linter
+
+  - name: "Download  Kubebuilder source"
+    uses: fetch
+    with:
+      uri: https://github.com/stackrox/kube-linter/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 4d92f9a6c0737c05f68611305c1aba4fe5f64e0833be1c4907d96079fc3a13ccac592831d2842ab4503ea7127bbf95c436247b91dcb4a9c4b885bd7d49d884ea  
+      directory:  kube-linter
+      delete: true
+
+  - name: "Build Kube-linter"
+    uses: go/build
+    with:
+      modroot: kube-linter
+      packages: ./cmd/kube-linter
+      # secfixes:
+      #   0.7.6-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - GHSA-m6hq-p25p-ffr2 
+      #     - GHSA-pwhc-rpq9-4c8w
+      deps: golang.org/x/crypto@v0.45.0 github.com/containerd/containerd@v1.7.29
+      ldflags: "-s -X golang.stackrox.io/kube-linter/internal/version.version=${{package.version}}"
+      output: kube-linter
+
+
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf kube-linter
+
