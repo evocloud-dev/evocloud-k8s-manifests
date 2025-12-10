@@ -58,11 +58,12 @@ pipeline:
            -X github.com/cloud-bulldozer/go-commons/v2/version.Version=${{package.version}}
            -X github.com/cloud-bulldozer/go-commons/v2/version.GitCommit=${{vars.git_commit}}
            -X github.com/cloud-bulldozer/go-commons/v2/version.BuildDate=${{vars.build_date}}
+           -X sigs.k8s.io/kubebuilder/v4/cmd.goos=linux 
+           -X sigs.k8s.io/kubebuilder/v4/cmd.goarch=x86_64
       output: kube-burner
 
-
   - uses: strip
-
+  
   - name: "Cleanup"
     runs: |
       rm -rf kube-burner
