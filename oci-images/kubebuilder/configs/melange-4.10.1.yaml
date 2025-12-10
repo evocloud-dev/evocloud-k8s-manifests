@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/kubernetes-sigs/kubebuilder
+# Reference: https://github.com/kubernetes-sigs/kubebuilder/blob/master/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name:  kubebuilder
+  version: 4.10.1 
+  epoch: 0
+  description: "Kubebuilder - SDK for building Kubernetes APIs using CRDs"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubernetes-sigs/kubebuilder"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "8bce950e46b914d54c872da25500b8c27b6c05e8"
+  build_date: "2025-12-00T08:44:20Z"
+  goos: "linux"       
+  goarch: "amd64"
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p  kubebuilder
+
+  - name: "Download  Kubebuilder source"
+    uses: fetch
+    with:
+      uri: https://github.com/kubernetes-sigs/kubebuilder/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 3ee5fee0581fb9b93731739307319cfb9c0df151443fc50730fb891601c6e75f85216ed418e77165d6a130920a0d8bf01fbbabbdee8764779551f4e7256b4f33
+      directory:  kubebuilder
+      delete: true
+
+  - name: "Build Kubebuilder"
+    uses: go/build
+    with:
+      modroot: kubebuilder
+      packages: .
+      ldflags: |
+        -s
+        -X sigs.k8s.io/kubebuilder/v4/cmd.kubeBuilderVersion=${{package.version}}
+        -X sigs.k8s.io/kubebuilder/v4/cmd.kubernetesVendorVersion=${{package.version}}
+        -X sigs.k8s.io/kubebuilder/v4/cmd.goos=${{vars.goos}}
+        -X sigs.k8s.io/kubebuilder/v4/cmd.goarch=${{vars.goarch}}
+        -X sigs.k8s.io/kubebuilder/v4/cmd.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/kubebuilder/v4/cmd.buildDate=${{vars.build_date}}
+      output: kubebuilder
+
+
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf kubebuilder
+
