@@ -14,7 +14,7 @@ package:
     - attestation: |
         Created by the EvoCloud Engineering Team.
         Copyright (C) 2025 EvoCloud, Inc.
-      license: Apache-2.0
+      license: MPL-2.0
   url: "https://github.com/opencost/opencost"
 
 environment:
@@ -56,7 +56,7 @@ pipeline:
             -extldflags "-static" 
             -s 
             -X github.com/opencost/opencost/core/pkg/version.Version=${{package.version}} 
-            -X github.com/opencost/opencost/core/pkg/version.GitCommit={{vars.git_commit}}
+            -X github.com/opencost/opencost/core/pkg/version.GitCommit=S{{vars.git_commit}}
       output: opencost
 
   - uses: strip
