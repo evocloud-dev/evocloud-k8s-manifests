@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/kubernetes-sigs/bom
+# Reference: https://github.com/kubernetes-sigs/bom/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: bom
+  version: 0.7.1 
+  epoch: 1
+  description: "A utility to generate SPDX-compliant Bill of Materials manifests"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubernetes-sigs/bom"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "1ab6284ac5e118267414f2ac3874bb08a701e9ad"
+  build_date: "2025-12-12T9:55:22Z"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING Bom SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kubernetes-sigs/bom
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   0.7.1-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+
+  - name: "Build Bom"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/bom
+      ldflags: |
+        -s 
+        -X sigs.k8s.io/bom/cmd/bom/cmd.GitVersion=${{package.version}}
+        -X sigs.k8s.io/bom/cmd/bom/cmd.GitCommit=${{vars.git_commit}}      
+      output: bom
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: bom/bom
+    strip-prefix: v
+
