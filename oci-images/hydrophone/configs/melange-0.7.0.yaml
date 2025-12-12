@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/kubernetes-sigs/hydrophone
+# Reference: https://github.com/kubernetes-sigs/hydrophone/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: hydrophone
+  version: 0.7.0 
+  epoch: 0
+  description: "Hydrophone is a lightweight Kubernetes conformance tests runner"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubernetes-sigs/hydrophone"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "3de3e886a2f6f09635d8b981c195490af1584d97"
+  build_time: "2025-12-12T8:55:40Z"
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p hydrophone
+
+  - name: "Download Hydrophone source"
+    uses: fetch
+    with:
+      uri: https://github.com/kubernetes-sigs/hydrophone/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 8f3116717b8d05a568baae1a4c85307d4f364dcdd3af3acac91ecc1aee735f1f19480078c41a44f1c41059b5adb4139f8bdef48554509dcb0883d57c0e2d81f5 
+      directory: hydrophone
+      delete: true
+
+  - name: "Build Hydrophone"
+    uses: go/build
+    with:
+      modroot: hydrophone
+      packages: .
+      ldflags: |
+        -s
+        -X github.com/org/hydrophone/cmd.version=${{package.version}}
+        -X github.com/org/hydrophone/cmd.commit=${{vars.git_commit}}
+        -X github.com/org/hydrophone/cmd.time=${{vars.build_time}}
+      output: hydrophone
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf hydrophone
+
