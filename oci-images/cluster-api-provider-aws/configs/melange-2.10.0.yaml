@@ -1,0 +1,69 @@
+# Source: https://github.com/kubernetes-sigs/cluster-api-provider-aws
+# Reference: https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/main/.goreleaser.yaml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: cluster-api-provider-aws
+  version: 2.10.0
+  epoch: 1
+  description: "Kubernetes Cluster API Provider AWS provides consistent deployment and day 2 operations of self-managed and EKS Kubernetes clusters on AWS."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubernetes-sigs/cluster-api-provider-aws"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "175074f222a2984ec569ab743fd352e6683b27cf"
+  build_date: "2025-12-15T10:39:04Z"
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p cluster-api-provider-aws
+
+  - name: "Download Cluster-api-provider-aws source"
+    uses: fetch
+    with:
+      uri: https://github.com/kubernetes-sigs/cluster-api-provider-aws/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: b843ceb2d8fa4a77df7619bcc49fb6777cb90f00fab5cfbae9349f23e575cf78d2b0dc761e75217bcb23f49c14d180f80aa1e9b329a095b9b78ff80637012bca
+      directory: cluster-api-provider-aws
+      delete: true
+    
+
+  - name: "Build Cluster-api-provider-aws"
+    uses: go/build
+    with:
+      modroot: cluster-api-provider-aws
+      packages: ./cmd/clusterawsadm
+      # secfixes:
+      #   2.10.0-r1:
+      #     - GHSA-hj57-j5cw-2mwp 
+      ldflags: |
+        -s 
+        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitMajor=2
+        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitMinor=10
+        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitVersion=v${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitTreeState=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.buildDate=${{vars.build_date}}
+
+      output: cluster-api-provider-aws
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf cluster-api-provider-aws
