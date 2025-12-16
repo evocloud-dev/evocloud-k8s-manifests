@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/kubernetes-sigs/cluster-api-provider-gcp
+# Reference: https://github.com/kubernetes-sigs/cluster-api-provider-gcp/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: cluster-api-provider-gcp
+  version: 1.10.0
+  epoch: 1
+  description: "The GCP provider implementation for Cluster API"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubernetes-sigs/cluster-api-provider-gcp"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: 6518ef9b44cfc4f8c3f7139b2ce4ae71523deff6
+  build_date: "2025-12-15T6:54:11Z"
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING Bom SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kubernetes-sigs/cluster-api-provider-gcp
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.19.1-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+
+
+  - name: "Build Cluster-api-provider-gcp"
+    uses: go/build
+    with:
+      modroot: .
+      packages: . 
+      ldflags: |
+        -s 
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=v${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}
+      output: cluster-api-provider-gcp
+
+  - uses: strip
+
+
+update:
+  enabled: true
+  github:
+    identifier: cluster-api-provider-gcp/cluster-api-provider-gcp
+    strip-prefix: v  
