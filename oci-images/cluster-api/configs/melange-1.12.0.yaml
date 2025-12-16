@@ -29,6 +29,8 @@ environment:
 vars:
   git_commit: "b52de697d29fff53556697504c1ca68205841383"
   build_date: "2025-12-14T3:47:13Z"
+  git_major: "1"
+  git_minor: "12"
 
 pipeline:
   #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
@@ -51,9 +53,12 @@ pipeline:
       packages: ./cmd/clusterctl
       ldflags: |
         -s 
-        -X github.com/kubernetes-sigs/cluster-api/version.GitVersion=${{package.version}}
-        -X github.com/kubernetes-sigs/cluster-api/version.GitCommit=${{vars.git_commit}} 
-        -X github.com/kubernetes-sigs/cluster-api/version.BuildDate=${{vars.build_date}}    
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}   
       output: clusterctl
 
   - name: "Build manager-core"
@@ -63,9 +68,12 @@ pipeline:
       packages: .
       ldflags: |
         -s 
-        -X github.com/kubernetes-sigs/cluster-api/version.GitVersion=${{package.version}}
-        -X github.com/kubernetes-sigs/cluster-api/version.GitCommit=${{vars.git_commit}}
-        -X github.com/kubernetes-sigs/cluster-api/version.BuildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}
       output: manager
 
   - name: "Build manager-kubeadm-bootstrap"
@@ -75,9 +83,12 @@ pipeline:
       packages: ./bootstrap/kubeadm
       ldflags: |
         -s 
-        -X github.com/kubernetes-sigs/cluster-api/version.GitVersion=${{package.version}}
-        -X github.com/kubernetes-sigs/cluster-api/version.GitCommit=${{vars.git_commit}}
-        -X github.com/kubernetes-sigs/cluster-api/version.BuildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}
       output: kubeadm-bootstrap-manager
 
   - name: "manager-kubeadm-control-plane"
@@ -87,9 +98,12 @@ pipeline:
       packages: ./controlplane/kubeadm
       ldflags: |
         -s 
-        -X github.com/kubernetes-sigs/cluster-api/version.GitVersion=${{package.version}}
-        -X github.com/kubernetes-sigs/cluster-api/version.GitCommit=${{vars.git_commit}}
-        -X github.com/kubernetes-sigs/cluster-api/version.BuildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}
       output: kubeadm-control-plane-manager  
 
   
@@ -100,9 +114,12 @@ pipeline:
       packages: ./infrastructure/docker
       ldflags: |
         -s 
-        -X github.com/kubernetes-sigs/cluster-api/version.GitVersion=${{package.version}}
-        -X github.com/kubernetes-sigs/cluster-api/version.GitCommit=${{vars.git_commit}}
-        -X github.com/kubernetes-sigs/cluster-api/version.BuildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}
       output: capd-manager    
 
   - uses: strip
