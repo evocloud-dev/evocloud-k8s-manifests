@@ -29,9 +29,12 @@ environment:
 vars:
   git_commit: 6518ef9b44cfc4f8c3f7139b2ce4ae71523deff6
   build_date: "2025-12-15T6:54:11Z"
+  git_major: "1"
+  git_minor: "10"
+  
 pipeline:
   #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
-  - name: "DOWNLOADING Bom SOURCE CODE"
+  - name: "Downloading Cluster-api-provider-gcp Source Code"
     uses: git-checkout
     with:
       repository: https://github.com/kubernetes-sigs/cluster-api-provider-gcp
@@ -56,9 +59,11 @@ pipeline:
       packages: . 
       ldflags: |
         -s 
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=v${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=${{package.version}}
         -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=clean
         -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}
       output: cluster-api-provider-gcp
 
