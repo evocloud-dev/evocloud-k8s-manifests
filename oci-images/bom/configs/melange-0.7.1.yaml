@@ -32,7 +32,7 @@ vars:
 
 pipeline:
   #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
-  - name: "DOWNLOADING Bom SOURCE CODE"
+  - name: "DOWNLOADING BOM SOURCE CODE"
     uses: git-checkout
     with:
       repository: https://github.com/kubernetes-sigs/bom
@@ -49,15 +49,14 @@ pipeline:
       go mod tidy
       go mod vendor
 
-  - name: "Build Bom"
+  - name: "BUILDING BOM BINARY"
     uses: go/build
     with:
       modroot: .
       packages: ./cmd/bom
       ldflags: |
         -s 
-        -X sigs.k8s.io/bom/cmd/bom/cmd.GitVersion=${{package.version}}
-        -X sigs.k8s.io/bom/cmd/bom/cmd.GitCommit=${{vars.git_commit}}      
+        -extldflags "-static"
       output: bom
 
   - uses: strip
@@ -65,6 +64,5 @@ pipeline:
 update:
   enabled: true
   github:
-    identifier: bom/bom
+    identifier: kubernetes-sigs/bom
     strip-prefix: v
-
