@@ -55,6 +55,7 @@ pipeline:
       ldflags: |
         -s
         -X github.com/hetznercloud/cli/internal/version.version=${{package.version}}
+        -X github.com/hetznercloud/cli/internal/version.versionPrerelease=""
       output: hcloud-cli
 
   - uses: strip
