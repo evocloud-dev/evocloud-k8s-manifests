@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: Apache-2.0
+# Source: https://github.com/hetznercloud/cli
+# Reference: https://github.com/hetznercloud/cli/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: hcloud-cli
+  version: 1.57.0
+  epoch: 1
+  description: "hcloud-cli is a command-line interface for Hetzner Cloud"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/hetznercloud/cli"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "90d8e66651f2af30900588395394472bd7a4c275"
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p hcloud
+
+  - name: "Download Hetznercloud-cli source"
+    uses: fetch
+    with:
+      uri: https://github.com/hetznercloud/cli/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 347efbd9107882c19cba9d0cbb8bb46b76ed12a5e3b25ca324e4a4375872097cdbd67e8573af309ea882e8c527f6c191268897150fa3637d4ea265a11c9ff95a
+      directory: hcloud
+      delete: true
+
+  - name: "Build Hetznercloud-cli"
+    uses: go/build
+    with:
+      modroot: hcloud
+      packages: ./cmd/hcloud
+      # secfixes:
+      #   0.11.1-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: |
+        -s
+        -X github.com/hetznercloud/cli/internal/version.version=${{package.version}}
+        -X github.com/hetznercloud/cli/internal/version.versionPrerelease=""
+      output: hcloud-cli
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf  hcloud
