@@ -1,9 +1,8 @@
 # SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
 # SPDX-License-Identifier: MPL-2.0
 # Source:
-# Ref: https://github.com/crossplane/crossplane
+# Ref: https://github.com/opencost/opencost/blob/develop/Makefile
 # Schema: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
-
 
 contents:
   repositories:
@@ -17,8 +16,8 @@ contents:
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Opencost (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE-free Opencost OCI image
+  org.opencontainers.image.title: OpenCost (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free OpenCost OCI image
   org.opencontainers.image.source: https://github.com/opencost/opencost
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
@@ -44,5 +43,3 @@ entrypoint:
 
 archs:
   - amd64
-
-
