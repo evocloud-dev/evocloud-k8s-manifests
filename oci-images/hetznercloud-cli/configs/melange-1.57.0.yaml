@@ -7,7 +7,7 @@ package:
   name: hcloud-cli
   version: 1.57.0
   epoch: 1
-  description: "OpenCost cost monitoring for Kubernetes"
+  description: "hcloud-cli is a command-line interface for Hetzner Cloud"
   target-architecture:
     - x86_64
   copyright:
@@ -55,7 +55,6 @@ pipeline:
       ldflags: |
         -s
         -X github.com/hetznercloud/cli/internal/version.version=${{package.version}}
-        -X github.com/hetznercloud/cli/internal/version.versionPrerelease=dev+${{vars.git_commit}}
       output: hcloud-cli
 
   - uses: strip
@@ -63,4 +62,3 @@ pipeline:
   - name: "Cleanup"
     runs: |
       rm -rf  hcloud
-
