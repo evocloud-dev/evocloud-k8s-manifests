@@ -53,7 +53,6 @@ pipeline:
       go mod tidy
       go mod vendor
 
-
   - name: "Build Cluster-api-provider-gcp"
     uses: go/build
     with:
@@ -71,9 +70,8 @@ pipeline:
 
   - uses: strip
 
-
 update:
   enabled: true
   github:
-    identifier: cluster-api-provider-gcp/cluster-api-provider-gcp
+    identifier: kubernetes-sigs/cluster-api-provider-gcp
     strip-prefix: v  
