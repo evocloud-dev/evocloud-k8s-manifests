@@ -1,4 +1,5 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
 # Source: https://github.com/kubernetes-sigs/karpenter-provider-cluster-api
 # Reference: https://github.com/kubernetes-sigs/karpenter-provider-cluster-api/blob/main/Makefile
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
@@ -30,7 +31,7 @@ vars:
   
 pipeline:
   #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
-  - name: "DOWNLOADING KARPEnTER-PROVIDER-CLUSTER-API SOURCE CODE"
+  - name: "DOWNLOADING KARPENTER-PROVIDER-CLUSTER-API SOURCE CODE"
     uses: git-checkout
     with:
       repository: https://github.com/kubernetes-sigs/karpenter-provider-cluster-api
@@ -38,7 +39,7 @@ pipeline:
       tag: v${{package.version}}
 
  
-  - name: "Build  Karpenter-clusterapi-controller"
+  - name: "BUILD KARPENTER-CLUSTER-API-CONTROLLER BINARY"
     uses: go/build
     with:
       modroot: .
@@ -51,5 +52,5 @@ pipeline:
 update:
   enabled: true
   github:
-    identifier: karpenter-provider-cluster-api/karpenter-provider-cluster-api
+    identifier: kubernetes-sigs/karpenter-provider-cluster-api
     strip-prefix: v
