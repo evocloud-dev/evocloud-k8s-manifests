@@ -1,0 +1,80 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/operator-framework/operator-sdk
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/operator-framework/operator-sdk/blob/master/Makefile
+
+package:
+  name: operator-sdk
+  version: 1.42.0
+  epoch: 1
+  description: "SDK for building Kubernetes applications. Provides high level APIs, useful abstractions, and project scaffolding."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/operator-framework/operator-sdk"
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle  
+      - gpgme
+      - gpgme-dev
+      - sqlite
+      - sqlite-dev 
+
+vars:
+  git_commit: "ab5563df5499cafa4ea9d40d4b36b51899a4718e"
+  k8s_version: "1.33.1"
+
+pipeline:
+  - name: "CREATING OPERATOR-SDK DIR"
+    runs: |
+      mkdir -p operator-sdk
+
+  - name: "DOWNLOAD OPERATOR-SDK SOURCE"
+    uses: fetch
+    with:
+      uri: https://github.com/operator-framework/operator-sdk/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: cb9eeb5ba3b748fc06782f2ca878b341fabce3d84206f900484dacfda2ec1090f9fc73508ac7e705f36eee3c677f74d361856cd041a1c901d1b934e38125b551 
+      directory: operator-sdk
+      delete: true
+
+  - name: "BUILD OPERATOR-SDK BINARY"
+    uses: go/build
+    with:
+      modroot: operator-sdk
+      packages: ./cmd/operator-sdk
+      # secfixes:
+      #   1.42.0-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - GHSA-f83f-xpx7-ffpw
+      deps: golang.org/x/crypto@v0.45.0 github.com/sigstore/fulcio@v1.8.3 
+      ldflags: |
+        -s
+        -X github.com/operator-framework/operator-sdk/internal/version.Version=${{package.version}}
+        -X github.com/operator-framework/operator-sdk/internal/version.GitVersion=${{package.version}}
+        -X github.com/operator-framework/operator-sdk/internal/version.GitCommit=${{vars.git_commit}}
+        -X github.com/operator-framework/operator-sdk/internal/version.KubernetesVersion=${{vars.k8s_version}}
+        -X github.com/operator-framework/operator-sdk/internal/version.ImageVersion=${{package.version}}          
+      output: operator-sdk
+
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf operator-sdk
