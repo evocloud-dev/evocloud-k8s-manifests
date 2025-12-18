@@ -13,12 +13,12 @@ contents:
     - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     - ./melange.rsa.pub
   packages:
-    - cluster-api-provider-aws@local
+    - clusterawsadm@local
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Cluster-api-aws (Clusterctl-aws + Clusterawsadm) (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE-free Cluster-api-aws OCI image
+  org.opencontainers.image.title: Clusterawsadm (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free Clusterawsadm OCI image
   org.opencontainers.image.source: https://github.com/kubernetes-sigs/cluster-api-provider-aws
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
@@ -41,7 +41,7 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bash  # --entrypoint=clusterctl-aws # --entrypoint=clusterawsadm
+  command: /usr/bin/clusterawsadm
   shell-fragment: ""
   services: {}
 
@@ -50,7 +50,6 @@ entrypoint:
 #  strategy: "origin"
 #  budget: 10
 
+
 archs:
   - amd64
-
-

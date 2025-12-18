@@ -5,7 +5,7 @@
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
 
 package:
-  name: cluster-api-provider-aws
+  name: clusterctl-aws
   version: 2.10.0
   epoch: 1
   description: "Kubernetes Cluster API Provider AWS provides consistent deployment and day 2 operations of self-managed and EKS Kubernetes clusters on AWS."
@@ -49,11 +49,11 @@ pipeline:
     #     - GHSA-f6x5-jh6r-wrfv
     #     - GHSA-hj57-j5cw-2mwp 
     runs: |
-      go get golang.org/x/crypto@v0.45.0 
-      go get github.com/coreos/ignition@2.24.0
+      go get golang.org/x/crypto@v0.45.0
       go mod tidy
       go mod vendor
 
+ 
   - name: "BUILD CLUSTERCTL-AWS BINARY"
     uses: go/build
     with:
@@ -63,27 +63,12 @@ pipeline:
         -s 
         -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitMajor=${{vars.git_major}}
         -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitMinor=${{vars.git_minor}}
-        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitVersion=v${{package.version}}
         -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitCommit=${{vars.git_commit}}
         -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitTreeState=clean
         -X sigs.k8s.io/cluster-api-provider-aws/v2/version.buildDate=${{vars.build_date}}
         -X sigs.k8s.io/cluster-api-provider-aws/v2/cmd/clusterawsadm/cmd/version.CLIName=clusterctl-aws
       output: clusterctl-aws
-
-  - name: "BUILD CLUSTERAWSADM BINARY"
-    uses: go/build
-    with:
-      modroot: .
-      packages: ./cmd/clusterawsadm
-      ldflags: |
-        -s 
-        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitMajor=${{vars.git_major}}
-        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitMinor=${{vars.git_minor}}
-        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitVersion=${{package.version}}
-        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitCommit=${{vars.git_commit}}
-        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.gitTreeState=clean
-        -X sigs.k8s.io/cluster-api-provider-aws/v2/version.buildDate=${{vars.build_date}}
-      output: clusterawsadm
 
   - uses: strip
 
