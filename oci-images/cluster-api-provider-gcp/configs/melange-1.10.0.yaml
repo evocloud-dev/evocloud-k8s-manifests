@@ -1,4 +1,6 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
 # Source: https://github.com/kubernetes-sigs/cluster-api-provider-gcp
 # Reference: https://github.com/kubernetes-sigs/cluster-api-provider-gcp/blob/main/Makefile
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
