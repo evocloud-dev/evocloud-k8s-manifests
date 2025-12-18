@@ -1,4 +1,5 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
 # Source: https://github.com/kubernetes-sigs/cluster-api-operator
 # Reference: https://github.com/kubernetes-sigs/cluster-api-operator/blob/main/Makefile
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
@@ -51,7 +52,7 @@ pipeline:
       go mod tidy
       go mod vendor
 
-  - name: "Build Clusterctl-operator"
+  - name: "BUILD CLUSTERCTL-OPERATOR BINARY"
     uses: go/build
     with:
       modroot: .
@@ -64,6 +65,7 @@ pipeline:
         -X sigs.k8s.io/cluster-api-operator/version.gitCommit=${{vars.git_commit}}
         -X sigs.k8s.io/cluster-api-operator/version.gitTreeState=clean
         -X sigs.k8s.io/cluster-api-operator/version.buildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-operator/version.gitReleaseCommit=${{vars.git_commit}} 
       output: clusterctl-operator
 
   - uses: strip
@@ -71,5 +73,5 @@ pipeline:
 update:
   enabled: true
   github:
-    identifier: cluster-api-operator/cluster-api-operator
+    identifier: kubernetes-sigs/cluster-api-operator
     strip-prefix: v
