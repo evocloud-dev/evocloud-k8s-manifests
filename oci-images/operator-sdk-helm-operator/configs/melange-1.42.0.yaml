@@ -1,4 +1,5 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
 
 # Source: https://github.com/operator-framework/operator-sdk
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
@@ -39,11 +40,11 @@ vars:
   k8s_version: "1.33.1"
 
 pipeline:
-  - name: "Prepare extraction directory"
+  - name: "CREATING OPERATOR-SDK DIR"
     runs: |
       mkdir -p helm-operator
 
-  - name: "Download Operator-sdk source"
+  - name: "DOWNLOAD OPERATOR-SDK SOURCE"
     uses: fetch
     with:
       uri: https://github.com/operator-framework/operator-sdk/archive/refs/tags/v${{package.version}}.tar.gz
@@ -51,7 +52,7 @@ pipeline:
       directory: helm-operator
       delete: true
 
-  - name: "Build Helm-operator"
+  - name: "BUILD HELM-OPERATOR BINARY"
     uses: go/build
     with:
       modroot: helm-operator
