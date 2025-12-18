@@ -1,4 +1,5 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
 # Source: https://github.com/kubernetes-sigs/cluster-api
 # Reference: https://github.com/kubernetes-sigs/cluster-api/blob/main/Makefile
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
@@ -34,32 +35,27 @@ vars:
 
 pipeline:
   #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
-  - name: "DOWNLOADING Cluster-api SOURCE CODE"
+  - name: "DOWNLOADING CLUSTER-API SOURCE CODE"
     uses: git-checkout
     with:
       repository: https://github.com/kubernetes-sigs/cluster-api
       expected-commit: ${{vars.git_commit}}
       tag: v${{package.version}}
-
-  - name: "PATCHING GO MODULES"
-    runs: |
-      go mod tidy
-      go mod vendor
-
   
-  - name: "manager-docker-infrastructure"
+  - name: "BUILD MANAGER-DOCKER-INFRASTRUCTURE BINARY"
     uses: go/build
     with:
       modroot: ./test
       packages: ./infrastructure/docker
       ldflags: |
         -s 
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMajor=${{vars.git_major}}
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitMinor=${{vars.git_minor}}
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitVersion=${{package.version}}
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitCommit=${{vars.git_commit}}
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.gitTreeState=clean
-        -X sigs.k8s.io/cluster-api-provider-gcp/version.buildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api/version.buildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api/version.gitReleaseCommit=${{vars.git_commit}} 
       output: capd-manager    
 
   - uses: strip
@@ -67,6 +63,6 @@ pipeline:
 update:
   enabled: true
   github:
-    identifier: cluster-api/cluster-api
+    identifier: kubernetes-sigs/cluster-api
     strip-prefix: v
 

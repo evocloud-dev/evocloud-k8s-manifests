@@ -13,12 +13,12 @@ contents:
     - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
     - ./melange.rsa.pub
   packages:
-    - cluster-api-manager@local
+    - cluster-api-manager-core@local
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Cluster-api-manager (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE-free Cluster-api-manager  OCI image
+  org.opencontainers.image.title: Cluster-api-manager-core (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free Cluster-api-manager-core  OCI image
   org.opencontainers.image.source: https://github.com/kubernetes-sigs/cluster-api
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
