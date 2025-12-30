@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/zarf-dev/zarf
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/zarf-dev/zarf/blob/main/Makefile
+
+package:
+  name: zarf
+  version: 0.68.1
+  epoch: 0
+  description: "The Airgap Native Packager Manager for Kubernetes"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/zarf-dev/zarf"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "e71a9b4674f52452e5d0a9cb3460b58dc61dce66"
+  build_date: "2025-12-29T19:19:38Z"
+  k8s_major: "0"
+  k8s_minor: "34"
+  k8s_patch: "3"
+  k9s_version: "v0.50.16"
+  crane_version: "v0.20.7"
+
+pipeline:
+  - name: "CREATING ZARF DIR"
+    runs: |
+      mkdir zarf
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING ZARF SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/zarf-dev/zarf/archive/v${{package.version}}/zarf-${{package.version}}.tar.gz
+      expected-sha512: 34d7f9dde92f2e39aa24a4cbe6492cb7a6b23e0547017885e52f3fdd9d89b9029ac73a2bb27f816f272d7cfe410a46683db62a75b82fc3f1947fb9aeb21b5a2b
+      directory: zarf
+      delete: true
+
+  - name: "BUILDING TERRAFORM BINARY"
+    uses: go/build
+    with:
+      modroot: zarf
+      packages: .
+      ldflags: |
+        -s 
+        -X github.com/zarf-dev/zarf/src/config.CLIVersion=${{package.version}}
+        -X k8s.io/component-base/version.gitVersion=v${{vars.k8s_major}}.${{vars.k8s_minor}}.${{vars.k8s_patch}}
+        -X k8s.io/component-base/version.gitCommit=${{vars.git_commit}}
+        -X k8s.io/component-base/version.buildDate=${{vars.build_date}}
+        -X k8s.io/component-base/version.gitTreeState=clean
+        -X helm.sh/helm/v3/pkg/lint/rules.k8sVersionMajor=${{vars.k8s_major}}
+        -X helm.sh/helm/v3/pkg/lint/rules.k8sVersionMinor=${{vars.k8s_minor}}
+        -X helm.sh/helm/v3/pkg/chartutil.k8sVersionMajor=${{vars.k8s_major}}
+        -X helm.sh/helm/v3/pkg/chartutil.k8sVersionMinor=${{vars.k8s_minor}}
+        -X github.com/derailed/k9s/cmd.version=${{vars.k9s_version}}
+        -X github.com/google/go-containerregistry/cmd/crane/cmd.Version=${{vars.crane_version}}
+        -X github.com/zarf-dev/zarf/src/cmd.syftVersion=${{package.version}}
+        -X github.com/zarf-dev/zarf/src/cmd.archivesVersion=${{package.version}}
+        -X github.com/zarf-dev/zarf/src/cmd.helmVersion=${{package.version}}
+      output: zarf
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf zarf
+ 
