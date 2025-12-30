@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/goharbor/harbor-cli
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/goharbor/harbor-cli/blob/main/.goreleaser.yaml
+package:
+  name: harbor-cli
+  version: 0.0.15
+  epoch: 0
+  description: "[Sandbox] Official Harbor CLI"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/goharbor/harbor-cli"
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+      #- busybox
+      #- go
+
+vars:
+  git_commit: "81364cd1d2b3e4a47b886d03df00149a67ae6f7e"
+ 
+
+pipeline:
+  - name: "CREATING HARBOR-CLI DIR"
+    runs: |
+      mkdir -p harbor-cli
+
+  - name: "DOWNLOADING HARBOR-CLI SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/goharbor/harbor-cli/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: 162e4367f6d71ed6d17102f04a0534101f336f47bec84eab4dafa2907371d07b6c548489492f15f053e16a7c2c3cfeb0bb816e88ec5ba1fc78cc4b105b32d342 
+      directory: harbor-cli
+      delete: true
+
+  - name: "BUILDING HARBOR-CLI BINARY"
+    uses: go/build
+    with:
+      modroot: harbor-cli
+      packages: ./cmd/harbor
+      ldflags: |
+        -s
+        -X github.com/goharbor/harbor-cli/cmd/harbor/internal/version.GitCommit=${{vars.git_commit}}
+        -X github.com/goharbor/harbor-cli/cmd/harbor/internal/version.Version=${{package.version}}
+      output: harbor-cli
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf harbor-cli
