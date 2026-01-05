@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 # Source: https://github.com/karmada-io/karmada
-# Reference: https://github.com/karmada-io/karmada/blob/master/hack/util.sh
+# Reference: https://raw.githubusercontent.com/karmada-io/karmada/refs/heads/master/hack/util.sh
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
 
 package:
