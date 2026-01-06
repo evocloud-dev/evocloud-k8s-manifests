@@ -1,0 +1,76 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/karmada-io/karmada
+# Reference: https://github.com/karmada-io/karmada/blob/master/hack/util.sh
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: karmada-webhook
+  version: 1.16.0
+  epoch: 1
+  description: "Open, Multi-Cloud, Multi-Cluster Kubernetes Orchestration"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/karmada-io/karmada"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "b1ff49568525b6bff36869af7dc3beb2add92425"
+  build_date: "2025-12-24T2:29:01Z"
+  git_major: "1"
+  git_minor: "16"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KARMADA SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/karmada-io/karmada
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.16.0-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+      
+  - name: "BUILD KARMADA-WEBHOOK BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/webhook
+      ldflags: |
+        -s 
+        -X github.com/karmada-io/karmada/pkg/version.gitVersion=${{package.version}}
+        -X github.com/karmada-io/karmada/pkg/version.gitCommit=${{vars.git_commit}}
+        -X github.com/karmada-io/karmada/pkg/version.gitTreeState=clean
+        -X github.com/karmada-io/karmada/pkg/version.gitShortCommit=${{vars.git_commit}} 
+        -X github.com/karmada-io/karmada/pkg/version.buildDate=${{vars.build_date}}
+      output: karmada-webhook
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: karmada-io/karmada
+    strip-prefix: v  
