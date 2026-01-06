@@ -65,5 +65,5 @@ pipeline:
 update:
   enabled: true
   github:
-    identifier: tofu-controller/tofu-controller
+    identifier: flux-iac/tofu-controller
     strip-prefix: v
