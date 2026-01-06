@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# Source:
+# Ref: https://github.com/flux-iac/tofu-controller
+# Schema: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
+
+
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+    - '@local /work/packages'
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    - ./melange.rsa.pub
+  packages:
+    - tofu-controller-all-in-one@local
+
+annotations:
+  org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
+  org.opencontainers.image.title: Tofu-controller (Runner + Manager + tfctl)(Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free Tofu-controller OCI image
+  org.opencontainers.image.source: https://github.com/flux-iac/tofu-controller
+  org.opencontainers.image.vendor: EvoCloud
+  org.opencontainers.image.version: "1.21.1"
+
+accounts:
+  groups:
+    - groupname: nonroot
+      gid: 65510
+      members: []
+  users:
+    - username: nonroot
+      uid: 65510
+      shell: /bin/false
+      #homedir: /dev/null
+  run-as: nonroot
+
+environment:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+
+entrypoint:
+  type: ""
+  command: /usr/bash  # --entrypoint=runner | --entrypoint=manager | --entrypoint=tfctl
+  shell-fragment: ""
+  services: {}
+
+#https://github.com/chainguard-dev/apko/blob/main/docs/layering.md
+#layering:
+#  strategy: "origin"
+#  budget: 10
+
+archs:
+  - amd64
