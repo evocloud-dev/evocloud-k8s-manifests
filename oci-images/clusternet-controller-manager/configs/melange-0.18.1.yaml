@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/clusternet/clusternet
+# Reference: https://github.com/clusternet/clusternet/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: clusternet-controller-manager
+  version: 0.18.1
+  epoch: 1
+  description: "[CNCF Sandbox Project] Managing your Kubernetes clusters (including public, private, edge, etc.) as easily as visiting the Internet"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/clusternet/clusternet"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "bbe50d31e489f7906dd2bcf7d57bd090c795e890"
+  git_major: "0"
+  git_minor: "18"
+  build_date: "2025-01-05T18:54:27Z" 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING CLUSTERNET SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/clusternet/clusternet
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   0.18.1-r1:
+    #     - GHSA-v778-237x-gjrc
+    #     - GHSA-v23v-6jw2-98fq
+    #     - GHSA-f9f8-9pmf-xv68
+    #     - GHSA-j5w8-q4qc-rx2x 
+    #     - GHSA-9h84-qmv7-982p 
+    #     - GHSA-vvgc-356p-c3xw
+    #     - GHSA-qxp5-gwg8-xv66
+    #     - GHSA-m6hq-p25p-ffr2
+    #     - GHSA-4hfp-h4cw-hj8p
+    #     - GHSA-f6x5-jh6r-wrfv
+    #     - GHSA-265r-hfxg-fhmg
+    #     - GHSA-5xqw-8hwv-wg92
+    #     - GHSA-557j-xg8c-q2mm 
+    #     - GHSA-pwhc-rpq9-4c8w 
+    #     - GHSA-4vq8-7jfc-9cvp 
+    runs: |
+      go get golang.org/x/crypto@v0.45.0 
+      go get golang.org/x/oauth2@v0.34.0
+      go get golang.org/x/net@v0.48.0
+      go get github.com/docker/docker@v25.0.6 
+      go mod tidy
+      go mod vendor
+
+  - name: "BUILD CLUSTERNET-CONTROLLER-MANAGER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/clusternet-controller-manager
+      ldflags: |
+        -s
+        -X k8s.io/client-go/pkg/version.buildDate=${{vars.build_date}}
+        -X k8s.io/component-base/version.buildDate=${{vars.build_date}}
+        -X k8s.io/client-go/pkg/version.gitCommit=${{vars.git_commit}}
+        -X k8s.io/component-base/version.gitCommit=${{vars.git_commit}}
+        -X k8s.io/client-go/pkg/version.gitTreeState=clean
+        -X k8s.io/component-base/version.gitTreeState=clean
+        -X k8s.io/client-go/pkg/version.gitVersion=v${{package.version}}
+        -X k8s.io/component-base/version.gitVersion=v${{package.version}}
+        -X k8s.io/client-go/pkg/version.gitMajor=${{vars.git_major}}
+        -X k8s.io/component-base/version.gitMajor=${{vars.git_major}}
+        -X k8s.io/client-go/pkg/version.gitMinor=${{vars.git_minor}}
+        -X k8s.io/component-base/version.gitMinor=${{vars.git_minor}}
+      output: clusternet-controller-manager
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: clusternet/clusternet
+    strip-prefix: v  
