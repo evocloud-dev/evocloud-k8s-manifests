@@ -40,7 +40,7 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bash  #--entrypoint=runner --entrypoint=clusterctl-manager #--entrypoint=tfctl
+  command: /usr/bash  # --entrypoint=runner | --entrypoint=manager | --entrypoint=tfctl
   shell-fragment: ""
   services: {}
 
@@ -51,5 +51,3 @@ entrypoint:
 
 archs:
   - amd64
-
-
