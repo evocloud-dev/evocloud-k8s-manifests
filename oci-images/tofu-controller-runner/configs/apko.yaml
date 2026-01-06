@@ -17,11 +17,11 @@ contents:
 
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
-  org.opencontainers.image.title: Tofu-controller (Runner)(Packaged by EvoCloud)
+  org.opencontainers.image.title: Tofu-controller-Runner (Packaged by EvoCloud)
   org.opencontainers.image.description: Distroless and near CVE-free Tofu-controller-runner OCI image
   org.opencontainers.image.source: https://github.com/flux-iac/tofu-controller
   org.opencontainers.image.vendor: EvoCloud
-  org.opencontainers.image.version: "1.21.1"
+  org.opencontainers.image.version: "0.16.0-rc.7"
 
 accounts:
   groups:
@@ -50,5 +50,3 @@ entrypoint:
 
 archs:
   - amd64
-
-
