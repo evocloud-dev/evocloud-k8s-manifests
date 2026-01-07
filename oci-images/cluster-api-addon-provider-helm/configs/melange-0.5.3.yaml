@@ -1,0 +1,78 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/kubernetes-sigs/cluster-api-addon-provider-helm
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/kubernetes-sigs/cluster-api-addon-provider-helm/blob/main/Makefile
+
+package:
+  name: cluster-api-addon-provider-helm
+  version: 0.5.3
+  epoch: 0
+  description: "CAAPH uses Helm charts to manage the installation and lifecycle of Cluster API add-ons."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kubernetes-sigs/cluster-api-addon-provider-helm"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+vars:
+  git_commit: 6518ef9b44cfc4f8c3f7139b2ce4ae71523deff6
+  build_date: "2025-12-22T12:20:03Z"
+  git_major: "0"
+  git_minor: "5"
+
+
+pipeline:
+  - name: "CREATING CLUSTER-API-ADDON-ROVIDER-HELM DIR"
+    runs: |
+      mkdir cluster-api-addon-provider-helm
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING CLUSTER-API-ADDON-ROVIDER-HELM SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/kubernetes-sigs/cluster-api-addon-provider-helm/archive/v${{package.version}}/cluster-api-addon-provider-helm-${{package.version}}.tar.gz
+      expected-sha512: de26ddd9f6c92c7c4f50e84462ee03b638fea2a1d8a617173403fefd8008bb2fdf7d3999f33738cee61acdd2c381abd8d1a4634289bca499e71ad663b52b14bd
+      directory: cluster-api-addon-provider-helm
+      delete: true
+
+  - name: "BUILDING MANAGER BINARY"
+    uses: go/build
+    with:
+      modroot: cluster-api-addon-provider-helm
+      packages: .
+    
+      ldflags:
+        -s 
+        -X sigs.k8s.io/cluster-api-addon-provider-helm/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-addon-provider-helm/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-addon-provider-helm/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-addon-provider-helm/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-addon-provider-helm/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-addon-provider-helm/version.buildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-addon-provider-helm/version.itReleaseCommit=${{vars.git_commit}}
+      output: cluster-api-addon-provider-helm
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf cluster-api-addon-provider-helm
+ 
