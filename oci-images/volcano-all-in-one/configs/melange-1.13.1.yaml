@@ -73,6 +73,21 @@ pipeline:
         -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
       output: vc-scheduler
 
+# The agent-scheduler binary is currently only available in the master branch.
+# It will be included in the next official release.
+
+  - name: "BUILD VC-AGENT-SCHEDULER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/agent-scheduler
+      ldflags: |
+        -s
+        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+      output: vc-agent-scheduler
+
   - name: "BUILD NETWORK-QOS BINARY"
     uses: go/build
     with:
