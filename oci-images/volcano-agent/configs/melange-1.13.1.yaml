@@ -9,7 +9,7 @@ package:
   name: vc-agent
   version: 1.13.1
   epoch: 1
-  description: "A Cloud Native Batch System (Project under CNCF)"
+  description: "A Kubernetes-native batch scheduling system, extending and enhancing the capabilities of the standard kube-scheduler."
   target-architecture:
     - x86_64
   copyright:
