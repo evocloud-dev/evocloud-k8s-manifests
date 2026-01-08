@@ -52,7 +52,8 @@ pipeline:
     #     - GHSA-m425-mq94-257g
     runs: |
       go get github.com/opencontainers/runc@v1.2.8
-      go get github.com/opencontainers/selinux@v1.13.0 
+      go get github.com/opencontainers/selinux@v1.13.0
+      go get golang.org/x/crypto@v0.45.0
       go mod tidy
       go mod vendor
 
