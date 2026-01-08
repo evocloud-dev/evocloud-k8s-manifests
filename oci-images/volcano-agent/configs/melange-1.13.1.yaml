@@ -40,7 +40,10 @@ pipeline:
       repository: https://github.com/volcano-sh/volcano
       expected-commit: ${{vars.git_commit}}
       tag: v${{package.version}}
-      
+
+  ###########################################################################################################
+  # STILL NEED A FIX FOR: google.golang.org/grpc  v1.57.0    1.57.1    go-module  GHSA-m425-mq94-257g  High #
+  ###########################################################################################################
   - name: "PATCHING GO MODULES"
     # secfixes:
     #   1.13.1-r1:
@@ -55,7 +58,6 @@ pipeline:
       go get github.com/opencontainers/selinux@v1.13.0 
       go mod tidy
       go mod vendor
-
 
   - name: "BUILD VC-AGENT BINARY"
     uses: go/build
