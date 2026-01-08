@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/dexidp/dex
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/dexidp/dex/blob/master/Makefile
+
+package:
+  name: dex
+  version: 2.44.0
+  epoch: 4
+  description: "OpenID Connect (OIDC) identity and OAuth 2.0 provider with pluggable connectors."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/dexidp/dex"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "CREATING DEX DIR"
+    runs: |
+      mkdir dex
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING DEX SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/dexidp/dex/archive/v${{package.version}}/dex-${{package.version}}.tar.gz
+      expected-sha512: 65dfca65501e601c6e8425cbfee65a64db7ad5cd9b759badca694be51a6b03d2a5f78883532dfd88590ceced55c7c5da5bc0f35d75f3bc7c9339c54f589380fc
+      directory: dex
+      delete: true
+
+  - name: "BUILDING DEX BINARY"
+    uses: go/build
+    with:
+      modroot: dex
+      packages: ./cmd/dex
+      # secfixes:
+      #   2.44.0-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - CVE-2025-58181
+      #     - CVE-2025-47914
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags:
+        -s -X main.version=${{package.version}}
+      output: dex
+
+  - name: "BUILDING DOCKER-ENTRYPOINT BINARY"
+    uses: go/build
+    with:
+      modroot: dex
+      packages: ./cmd/docker-entrypoint
+      # secfixes:
+      #   2.44.0-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - CVE-2025-58181
+      #     - CVE-2025-47914
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags:
+        -s -X main.version=${{package.version}}
+      output: docker-entrypoint
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf dex
+ 
