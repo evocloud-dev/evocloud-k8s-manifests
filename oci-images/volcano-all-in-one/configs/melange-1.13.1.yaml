@@ -56,8 +56,6 @@ pipeline:
       go get golang.org/x/crypto@v0.45.0
       go get github.com/opencontainers/runc@v1.2.8
       go get github.com/opencontainers/selinux@v1.13.0
-      go get k8s.io/kubernetes@v1.33.6 
-      go get google.golang.org/grpc@v1.57.1 
       go mod tidy
       go mod vendor
 
