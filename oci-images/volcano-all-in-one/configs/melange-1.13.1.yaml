@@ -9,7 +9,7 @@ package:
   name: volcano-all-in-one
   version: 1.13.1
   epoch: 1
-  description: "A Cloud Native Batch System (Project under CNCF)"
+  description: "A Kubernetes-native batch scheduling system, extending and enhancing the capabilities of the standard kube-scheduler."
   target-architecture:
     - x86_64
   copyright:
@@ -75,18 +75,20 @@ pipeline:
 
 # The agent-scheduler binary is currently only available in the master branch.
 # It will be included in the next official release.
-
-  - name: "BUILD VC-AGENT-SCHEDULER BINARY"
-    uses: go/build
-    with:
-      modroot: .
-      packages: ./cmd/agent-scheduler
-      ldflags: |
-        -s
-        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
-        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
-        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
-      output: vc-agent-scheduler
+###############################################################################
+# Uncomment the VC-AGENT-SCHEDULER once it is finally released
+###############################################################################
+  #- name: "BUILD VC-AGENT-SCHEDULER BINARY"
+  #  uses: go/build
+  #  with:
+  #    modroot: .
+  #    packages: ./cmd/agent-scheduler
+  #    ldflags: |
+  #      -s
+  #      -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+  #      -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+  #      -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+  #    output: vc-agent-scheduler
 
   - name: "BUILD NETWORK-QOS BINARY"
     uses: go/build
