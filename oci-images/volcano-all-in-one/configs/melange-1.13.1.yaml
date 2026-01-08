@@ -1,0 +1,158 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/volcano-sh/volcano
+# Reference: https://github.com/volcano-sh/volcano/blob/master/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: volcano-all-in-one
+  version: 1.13.1
+  epoch: 1
+  description: "A Kubernetes-native batch scheduling system, extending and enhancing the capabilities of the standard kube-scheduler."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/volcano-sh/volcano"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "0c6f3bf706ad6790b1e806ef5e65c2ffdb3418ba"
+  build_date: "2026-1-4T12:06:04Z" 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING VOLCANO SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/volcano-sh/volcano
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+   
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.13.1-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    #     - GHSA-cgrx-mc8f-2prm
+    #     - GHSA-4x4m-3c2p-qppc
+    #     - GHSA-qw9x-cqr3-wc7r
+    #     - GHSA-9493-h29p-rfm2
+    #     - GHSA-r6j8-c6r2-37rr 
+    #     - GHSA-m425-mq94-257g
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go get github.com/opencontainers/runc@v1.2.8
+      go get github.com/opencontainers/selinux@v1.13.0
+      go mod tidy
+      go mod vendor
+
+  - name: "BUILD VC-SCHEDULER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/scheduler
+      ldflags: |
+        -s
+        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+      output: vc-scheduler
+
+# The agent-scheduler binary is currently only available in the master branch.
+# It will be included in the next official release.
+###############################################################################
+# Uncomment the VC-AGENT-SCHEDULER once it is finally released
+###############################################################################
+  #- name: "BUILD VC-AGENT-SCHEDULER BINARY"
+  #  uses: go/build
+  #  with:
+  #    modroot: .
+  #    packages: ./cmd/agent-scheduler
+  #    ldflags: |
+  #      -s
+  #      -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+  #      -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+  #      -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+  #    output: vc-agent-scheduler
+
+  - name: "BUILD NETWORK-QOS BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/network-qos
+      ldflags: |
+        -s 
+        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+      output: network-qos
+
+  - name: "BUILD VC-CONTROLLER-MANAGER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/controller-manager
+      ldflags: |
+        -s
+        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+      output: vc-controller-manager
+
+  - name: "BUILD VC-WEBHOOK-MANAGER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/webhook-manager
+      ldflags: |
+        -s
+        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+      output: vc-webhook-manager
+
+  - name: "BUILD VC-AGENT BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/agent
+      ldflags: |
+        -s
+        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+      output: vc-agent
+
+  
+  - name: "BUILD VCCTL BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/cli
+      ldflags: |
+        -s
+        -X volcano.sh/volcano/pkg/version.Version=${{package.version}}
+        -X volcano.sh/volcano/pkg/version.GitSHA=${{vars.git_commit}}
+        -X volcano.sh/volcano/pkg/version.Built=${{vars.build_date}}
+      output: vcctl
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: volcano-sh/volcano
+    strip-prefix: v
