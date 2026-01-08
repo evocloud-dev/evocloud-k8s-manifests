@@ -9,7 +9,7 @@ package:
   name: clusternet-scheduler
   version: 0.18.1
   epoch: 1
-  description: "[CNCF Sandbox Project] Managing your Kubernetes clusters (including public, private, edge, etc.) as easily as visiting the Internet"
+  description: "Clusternet (Cluster Internet) is an open source add-on that helps you manage thousands of millions of Kubernetes clusters as easily as visiting the Internet."
   target-architecture:
     - x86_64
   copyright:
