@@ -42,7 +42,7 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bash #--entrypoint=vc-scheduler #--entrypoint=network-qos #--entrypoint=vc-controller-manager  #--entrypoint=vc-webhook-manager #--entrypoint=vc-agent  #--entrypoint=vcctl 
+  command: /usr/bash #--entrypoint=vc-scheduler #--entrypoint=network-qos #--entrypoint=vc-controller-manager  #--entrypoint=vc-webhook-manager #--entrypoint=vc-agent  #--entrypoint=vcctl #--entrypoint=vc-agent-scheduler
   shell-fragment: ""
   services: {}
 
