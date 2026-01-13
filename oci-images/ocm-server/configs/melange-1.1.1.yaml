@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/open-cluster-management-io/ocm
+# Reference: https://github.com/open-cluster-management-io/ocm/tree/main/build
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: server
+  version: 1.1.1
+  epoch: 1
+  description: "Open Cluster Management is a community-driven project focused on multicluster and multicloud scenarios for Kubernetes apps."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/open-cluster-management-io/ocm"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "0205147e21d855a42f150230071a80aea597bdf3"
+  build_date: "2026-01-08T17:36:33Z"
+  git_major: "1"
+  git_minor: "1"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING OPEN-CLUSTER-MANAGEMENT SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/open-cluster-management-io/ocm
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.1.1-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv 
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+      
+  - name: "BUILD SERVER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/server
+      ldflags: |
+        -s 
+        -X open-cluster-management.io/ocm/pkg/version.commitFromGit=${{vars.git_commit}}
+        -X open-cluster-management.io/ocm/pkg/version.versionFromGit=${{package.version}}
+        -X open-cluster-management.io/ocm/pkg/version.majorFromGit=${{vars.git_major}}
+        -X open-cluster-management.io/ocm/pkg/version.minorFromGit=${{vars.git_minor}}
+      output: server
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: open-cluster-management-io/ocm
+    strip-prefix: v  
