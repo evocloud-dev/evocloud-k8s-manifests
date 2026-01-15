@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/fluxcd/notification-controller
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/fluxcd/notification-controller/blob/main/Makefile
+
+package:
+  name: notification-controller
+  version: 1.7.5
+  epoch: 1
+  description: "The GitOps Toolkit event forwarder and notification dispatcher"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/fluxcd/notification-controller"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "CREATING NOTIFICATION-CONTROLLER DIR"
+    runs: |
+      mkdir notification-controller
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING NOTIFICATION-CONTROLLER SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/fluxcd/notification-controller/archive/v${{package.version}}/notification-controller-${{package.version}}.tar.gz
+      expected-sha512: 5d0bbe004be49372bc49f79e8188fb0394986198543c427b99899a878098fadde75c95b698028939523fd27ce8efd9a56e69607e7347822948951781b9e42622
+      directory: notification-controller
+      delete: true
+
+  - name: "BUILDING NOTIFICATION-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: notification-controller
+      packages: .
+      # secfixes:
+      #   1.7.5-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: -s 
+      output: notification-controller
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf notification-controller
+ 
