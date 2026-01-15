@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/grafana/grafana-operator
+# Reference: https://github.com/grafana/grafana-operator/blob/master/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: grafana-operator
+  version: 5.21.4
+  epoch: 0
+  description: "An operator for Grafana that installs and manages Grafana instances, Dashboards and Datasources through Kubernetes/OpenShift CRs."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/grafana/grafana-operator"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "23c0a1a686b5651ff486f9c1c424ca07fc1023c2"
+ 
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING GRAFANA OPERATOR SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository:  https://github.com/grafana/grafana-operator
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+      
+  - name: "BUILD GRAFANA OPERATOR BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: .
+      ldflags: 
+        -s  -X github.com/grafana/grafana-operator/v5/embeds.Version={{package.version}}
+      output: grafana-operator
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: grafana/grafana-operator
+    strip-prefix: v  
