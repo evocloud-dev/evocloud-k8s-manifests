@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/wagoodman/dive
+# Reference: https://github.com/wagoodman/dive/blob/main/.goreleaser.yaml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: dive 
+  version: 0.13.1
+  epoch: 0
+  description: " A tool for exploring each layer in a docker image."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/wagoodman/dive"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "fe98c8a2eb08c443a36e3cc7568078909e298433"
+  build_date: "2026-01-14T15:03:51Z"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING DIVE SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/wagoodman/dive
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+      
+  - name: "BUILD DIVE BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/dive
+      ldflags: |
+        -s 
+        -X main.version={{package.version}}
+        -X main.gitCommit={{vars.git_commitCommit}}
+        -X main.buildDate={{vars.build_dateDate}}
+        -X main.gitDescription={{package.description}}
+      output: dive
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: wagoodman/dive
+    strip-prefix: v  
