@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/fluxcd/kustomize-controller
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/fluxcd/kustomize-controller/blob/main/Makefile
+
+package:
+  name: kustomize-controller
+  version: 1.7.3
+  epoch: 1
+  description: "The kustomize-controller is a Kubernetes operator, specialized in running continuous delivery pipelines for infrastructure and workloads defined with Kubernetes manifests and assembled with Kustomize."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/fluxcd/kustomize-controller"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "CREATING KUZTOMIZE-CONTROLLER DIR"
+    runs: |
+      mkdir kustomize-controller
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING KUZTOMIZE-CONTROLLER SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/fluxcd/kustomize-controller/archive/v${{package.version}}/kustomize-controller-${{package.version}}.tar.gz
+      expected-sha512: 9f8a393e3715732f3b0b8010ab961bc36a969648951bce07d1682c6bd284e8b42e19f0a56f8e339009125682b222e0c0eec62eae47c67605c1a8a3e84d9817f3
+      directory: kustomize-controller
+      delete: true
+
+  - name: "BUILDING KUZTOMIZE-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: kustomize-controller
+      packages: .
+      # secfixes:
+      #   1.7.3-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: -s 
+      output: kustomize-controller
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf kustomize-controller
+ 
