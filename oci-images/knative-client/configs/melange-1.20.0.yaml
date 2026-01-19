@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/knative/client
+# Reference: https://github.com/knative/client/blob/e46abb4d1df866343859796fa545abd088c5177e/hack/release.sh
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: knative-client
+  version: 1.20.0
+  epoch: 1
+  description: "Knative developer experience, docs, reference Knative CLI implementation"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/knative/client"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "b66b3da6ff01ee9c1f543786b56520194ac4eec1"
+  build_date: "2026-01-16T08:15:54Z"
+ 
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KNATIVE-CLIENT SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/knative/client
+      expected-commit: ${{vars.git_commit}}
+      tag: knative-v${{package.version}}
+
+# Vulnerabilities detected during scanning; included here for tracking purposes
+# Secfixes:
+# 1.20.0-r1:
+# - CVE-2025-61729 
+# - GHSA-7c64-f9jr-v9h2
+# - CVE-2026-0861 
+
+  - name: "BUILD KNATIVE-CLIENT BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/kn
+      ldflags: |
+        -s 
+        -X knative.dev/client/pkg/commands/version.BuildDate=${{vars.build_date}}
+        -X knative.dev/client/pkg/commands/version.Version=${{package.version}}
+        -X knative.dev/client/pkg/commands/version.GitRevision=${{vars.git_commit}}
+      output: knative-client
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: knative/client
+    strip-prefix: v  
