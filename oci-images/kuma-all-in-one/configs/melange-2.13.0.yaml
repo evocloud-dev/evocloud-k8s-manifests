@@ -54,7 +54,7 @@ pipeline:
       ldflags: |
         -s 
         -X github.com/kumahq/kuma/v2/pkg/version.version=${{package.version}}
-        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=v${{package.version}}
+        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.gitCommit=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.buildDate=${{vars.build_date}}
         -X github.com/kumahq/kuma/v2/pkg/version.Envoy=${{vars.envoy_version}}
@@ -68,7 +68,7 @@ pipeline:
       ldflags: |
         -s 
         -X github.com/kumahq/kuma/v2/pkg/version.version=${{package.version}}
-        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=v${{package.version}}
+        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.gitCommit=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.buildDate=${{vars.build_date}}
         -X github.com/kumahq/kuma/v2/pkg/version.Envoy=${{vars.envoy_version}}
@@ -82,7 +82,7 @@ pipeline:
       ldflags: |
         -s 
         -X github.com/kumahq/kuma/v2/pkg/version.version=${{package.version}}
-        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=v${{package.version}}
+        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.gitCommit=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.buildDate=${{vars.build_date}}
         -X github.com/kumahq/kuma/v2/pkg/version.Envoy=${{vars.envoy_version}}
@@ -96,7 +96,7 @@ pipeline:
       ldflags: |
         -s 
         -X github.com/kumahq/kuma/v2/pkg/version.version=${{package.version}}
-        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=v${{package.version}}
+        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.gitCommit=${{vars.git_commit}}
         -X github.com/kumahq/kuma/v2/pkg/version.buildDate=${{vars.build_date}}
         -X github.com/kumahq/kuma/v2/pkg/version.Envoy=${{vars.envoy_version}}
