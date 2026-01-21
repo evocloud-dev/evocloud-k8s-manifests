@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/dagger/dagger
+# Reference: https://github.com/dagger/dagger/blob/main/.goreleaser.common.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: dagger
+  version: 0.19.10
+  epoch: 1
+  description: "Automation engine to build, test and ship any codebase. Runs locally, in CI, or directly in the cloud"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/dagger/dagger"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+ 
+pipeline:
+  - name: "CREATING DAGGER DIR"
+    runs: |
+      mkdir dagger
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING DAGGER SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/dagger/dagger/archive/v${{package.version}}/dagger-${{package.version}}.tar.gz
+      expected-sha512: db7898c1ec59ffcc9537f299d6b981ee9a57d45f29528480bca2063d2bf0b8c70f1422459d7643dff24d425735e4153dd3598ab00243991b485c750bb8c90552 
+      directory: dagger
+      delete: true
+      
+  - name: "BUILD DAGGER BINARY"
+    uses: go/build
+    with:
+      modroot: dagger
+      packages: ./cmd/dagger
+      # secfixes:
+      #   0.19.10-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: |
+        -s
+        -X github.com/dagger/dagger/engine.Version=${{package.version}}
+        -X github.com/dagger/dagger/engine.Tag=${{package.version}}
+      output: dagger
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf dagger
