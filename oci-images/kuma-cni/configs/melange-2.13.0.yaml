@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/kumahq/kuma
+# Reference: https://github.com/kumahq/kuma/blob/master/mk/build.mk
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: kuma-cni
+  version: 2.13.0
+  epoch: 0
+  description: "The multi-zone service mesh for containers, Kubernetes and VMs. Built with Envoy. CNCF Sandbox Project."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kumahq/kuma"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "99bb946e09bcdf7f7e6c1275c8bf14206db77274"
+  build_date: "2026-01-20T07:40:58Z"
+  envoy_version: "1.36.4"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KUMA SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kumahq/kuma
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+
+  - name: "BUILD KUMA-CNI BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/cni/cmd/kuma-cni
+      ldflags: |
+        -s 
+        -X github.com/kumahq/kuma/v2/pkg/version.version=${{package.version}}
+        -X github.com/kumahq/kuma/v2/pkg/version.gitTag=${{vars.git_commit}}
+        -X github.com/kumahq/kuma/v2/pkg/version.gitCommit=${{vars.git_commit}}
+        -X github.com/kumahq/kuma/v2/pkg/version.buildDate=${{vars.build_date}}
+        -X github.com/kumahq/kuma/v2/pkg/version.Envoy=${{vars.envoy_version}}
+      output: kuma-cni
+   
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: kumahq/kuma
+    strip-prefix: v
