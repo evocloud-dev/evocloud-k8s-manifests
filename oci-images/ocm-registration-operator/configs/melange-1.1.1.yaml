@@ -62,7 +62,6 @@ pipeline:
         -s 
       output: registration-operator 
 
-
   - uses: strip
 
 update:
