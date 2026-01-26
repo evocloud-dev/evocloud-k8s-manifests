@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/ray-project/kuberay
+# Reference: https://github.com/ray-project/kuberay/blob/master/ray-operator/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: ray-operator
+  version: 1.5.1
+  epoch: 0
+  description: "A toolkit to run Ray applications on Kubernetes."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/ray-project/kuberay"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "9e8a2c085b7b7c96cf7cc5d857787bc2d78406c6"
+  build_time: "2026-01-21T17:40:16Z"
+
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KUBERAY SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/ray-project/kuberay
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "BUILD MANAGER BINARY"
+    uses: go/build
+    with:
+      modroot: ./ray-operator
+      packages: .
+      ldflags: |
+        -s 
+        -X main._buildTime_=${{vars.build_time}}       
+        -X main._commitId_=${{vars.git_commit}}
+      output: manager
+   
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: ray-project/kuberay
+    strip-prefix: v
