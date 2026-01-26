@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/fluxcd/image-automation-controller
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/fluxcd/image-automation-controller/blob/main/Makefile
+
+package:
+  name: kustomize-controller
+  version: 1.0.4
+  epoch: 1
+  description: "GitOps Toolkit controller that patches container image tags in Git"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/fluxcd/image-automation-controller"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "CREATING IMAGE-AUTOMATION-CONTROLLER DIR"
+    runs: |
+      mkdir image-automation-controller
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING IMAGE-AUTOMATION-CONTROLLER SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/fluxcd/image-automation-controller/archive/v${{package.version}}/image-automation-controller-${{package.version}}.tar.gz
+      expected-sha512: 76c9f5097014d062bd361c20175fa7248d050184e4b16e88307c720d1dbca7e2b8bf3018015df2d205f67f43212b835ca5ef7e1ac52a4c4c4ffbc4410f546272
+      directory: image-automation-controller
+      delete: true
+
+  - name: "BUILDING IMAGE-AUTOMATION-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: image-automation-controller
+      packages: .
+      # secfixes:
+      #   1.0.4-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: -s 
+      output: image-automation-controller
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf image-automation-controller
+ 
