@@ -1,0 +1,69 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/openfga/openfga
+# Reference: https://github.com/openfga/openfga/blob/main/.goreleaser.yaml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: openfga
+  version: 1.11.2
+  epoch: 0
+  description: "A high performance and flexible authorization/permission engine built for developers and inspired by Google Zanzibar"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/openfga/openfga"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "0ad13d78133fcb1045f0b9f5fee11574a0d63bb2"
+  build_commit: "0ad13d78133fcb1045f0b9f5fee11574a0d63bb2"
+  build_date: "2026-01-21T12:14:23Z"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING OPENFGA SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/openfga/openfga
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+
+  - name: "BUILD OPENFGA BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/openfga
+      ldflags: |
+        -s 
+        -X github.com/openfga/openfga/internal/build.Version=v${{package.version}}
+        -X github.com/openfga/openfga/internal/build.Commit=${{vars.build_commit}}
+        -X github.com/openfga/openfga/internal/build.Date=${{vars.build_date}}
+        -X github.com/openfga/openfga/internal/build.ProjectName=${{package.name}}
+      output: openfga
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: openfga/openfga
+    strip-prefix: v
