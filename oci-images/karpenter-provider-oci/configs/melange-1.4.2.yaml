@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/zoom/karpenter-oci
+# Reference: https://github.com/zoom/karpenter-oci/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: karpenter-provider-oci
+  version: 1.4.2
+  epoch: 1
+  description: "the oracle cloud provider of karpenter."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/zoom/karpenter-oci"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+vars:
+  git_commit: "c6c1d135a9b5a5c565e5f02b3608ea9794faed15"
+  
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KARPENTER-PROVIDER-OCI SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/zoom/karpenter-oci
+      expected-commit: ${{vars.git_commit}}
+      tag: karpenter-crd-${{package.version}}
+
+        
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.4.2-r1:
+    #     - GHSA-6v2p-p543-phr9
+    #     - GHSA-j5w8-q4qc-rx2x 
+    #     - GHSA-f6x5-jh6r-wrfv 
+    runs: |
+      go get golang.org/x/oauth2@v0.34.0
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+
+  - name: "Build KARPENTER-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/controller
+      ldflags: 
+        -s -X sigs.k8s.io/karpenter/pkg/operator.Version=${{package.version}}
+      output: karpenter-provider-oci
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: zoom/karpenter-oci
+    strip-prefix: v
