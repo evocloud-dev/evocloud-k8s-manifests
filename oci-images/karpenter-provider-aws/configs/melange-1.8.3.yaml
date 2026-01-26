@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/aws/karpenter-provider-aws
+# Reference: https://github.com/aws/karpenter-provider-aws/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: karpenter-provider-aws
+  version: 1.8.3
+  epoch: 0
+  description: "Karpenter is a Kubernetes Node Autoscaler built for flexibility, performance, and simplicity."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/aws/karpenter-provider-aws"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+vars:
+  git_commit: "c9c3a48888bceee4d01e0fec80a03a6379ca928f"
+  
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KARPENTER-PROVIDER-AWS SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/aws/karpenter-provider-aws
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+ 
+  - name: "Build KARPENTER-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/controller
+      ldflags: 
+        -s -X sigs.k8s.io/karpenter/pkg/operator.Version=${{package.version}}
+      output:  karpenter-provider-aws
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: aws/karpenter-provider-aws
+    strip-prefix: v
