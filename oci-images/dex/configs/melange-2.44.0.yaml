@@ -5,6 +5,7 @@
 # Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
 # Reference: https://github.com/dexidp/dex/blob/master/Makefile
 
+#NOT FIXED: glibc  2.42-r6    apk   CVE-2025-15281  High
 package:
   name: dex
   version: 2.44.0
