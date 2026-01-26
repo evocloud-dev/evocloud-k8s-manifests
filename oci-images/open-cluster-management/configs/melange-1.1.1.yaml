@@ -60,11 +60,6 @@ pipeline:
       packages: ./cmd/addon
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/version.minorFromGit=${{vars.git_minor}}
-        -X open-cluster-management.io/ocm/version.buildDate=${{vars.build_date}}
       output: addon
 
   - name: "BUILD PLACEMENT BINARY"
@@ -74,11 +69,6 @@ pipeline:
       packages: ./cmd/placement
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/version.minorFromGit=${{vars.git_minor}}
-        -X open-cluster-management.io/ocm/version.buildDate=${{vars.build_date}}
       output: placement
 
   - name: "BUILD REGISTRATION BINARY"
@@ -88,11 +78,6 @@ pipeline:
       packages: ./cmd/registration
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/version.minorFromGit=${{vars.git_minor}}
-        -X open-cluster-management.io/ocm/version.buildDate=${{vars.build_date}}
       output: registration
   
   - name: "BUILD SERVER BINARY"
@@ -102,11 +87,6 @@ pipeline:
       packages: ./cmd/server
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/version.minorFromGit=${{vars.git_minor}}
-        -X open-cluster-management.io/ocm/version.buildDate=${{vars.build_date}}
       output: server
 
   - name: "BUILD REGISTRATION-OPERATOR BINARY"
@@ -116,11 +96,6 @@ pipeline:
       packages: ./cmd/registration-operator 
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/version.minorFromGit=${{vars.git_minor}}
-        -X open-cluster-management.io/ocm/version.buildDate=${{vars.build_date}}
       output: registration-operator 
 
   - name: "BUILD WORK BINARY"
@@ -130,11 +105,6 @@ pipeline:
       packages: ./cmd/work
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/version.minorFromGit=${{vars.git_minor}}
-        -X open-cluster-management.io/ocm/version.buildDate=${{vars.build_date}}
       output: work
 
   - uses: strip
