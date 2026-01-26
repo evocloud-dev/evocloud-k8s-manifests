@@ -4,7 +4,6 @@
 # Ref: https://github.com/kubernetes-sigs/karpenter-provider-cluster-api
 # Schema: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
 
-
 contents:
   repositories:
     - https://packages.wolfi.dev/os
@@ -18,7 +17,7 @@ contents:
 annotations:
   org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
   org.opencontainers.image.title: karpenter-provider-cluster-api (Packaged by EvoCloud)
-  org.opencontainers.image.description: Distroless and near CVE-free karpenter-provider-cluster-api OCI image
+  org.opencontainers.image.description: Distroless and near Zero CVE-free karpenter-provider-cluster-api OCI image
   org.opencontainers.image.source: https://github.com/kubernetes-sigs/karpenter-provider-cluster-api
   org.opencontainers.image.licenses: MPL-2.0
   org.opencontainers.image.vendor: EvoCloud
@@ -52,5 +51,3 @@ entrypoint:
 
 archs:
   - amd64
-
-
