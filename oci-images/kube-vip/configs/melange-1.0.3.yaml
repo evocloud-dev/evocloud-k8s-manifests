@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/kube-vip/kube-vip
+# Reference: https://github.com/kube-vip/kube-vip/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: kube-vip
+  version: 1.0.3
+  epoch: 0
+  description: "Kubernetes Control Plane Virtual IP and Load-Balancer"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kube-vip/kube-vip"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "28bec598f5f35dbf0368e59834b9544a5825c90f"
+ 
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KUBE-VIP SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kube-vip/kube-vip
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+      
+  - name: "BUILD KUBE-VIP BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: .
+      ldflags: | 
+        -s 
+        -X main.Version=${{package.version}}
+        -X main.Build=${{vars.git_commit}}
+        -extldflags -static
+      output: kube-vip
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: kube-vip/kube-vip
+    strip-prefix: v  
