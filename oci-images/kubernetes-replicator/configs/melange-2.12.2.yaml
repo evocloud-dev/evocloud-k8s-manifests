@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/mittwald/kubernetes-replicator
+# Reference: https://github.com/mittwald/kubernetes-replicator/blob/master/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: kubernetes-replicator
+  version: 2.12.2
+  epoch: 0
+  description: "Kubernetes controller for synchronizing secrets & config maps across namespaces."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/mittwald/kubernetes-replicator"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "69a5350bb5def351f05bece35e2017f0ec6013ef"
+ 
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KUBERNETES-REPLICATOR SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/mittwald/kubernetes-replicator
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+      
+  - name: "BUILD KUBERNETES-REPLICATOR BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: .
+      ldflags: -s
+      output: kubernetes-replicator
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: mittwald/kubernetes-replicator
+    strip-prefix: v  
