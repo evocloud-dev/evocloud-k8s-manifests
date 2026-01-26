@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/kubescape/operator
+# Reference: https://github.com/kubescape/operator/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: operator
+  version: 0.2.121
+  epoch: 1
+  description: "Operator is an in-cluster component of the Kubescape security platform. It allows clients to connect to itself, listens for commands from the connected clients and controls other in-cluster components according to received commands."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kubescape/operator"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "4f9a61ce0fc0279873853644781e3bf9e5d5bdcd"
+ 
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KUBESCAPE-OPERATOR SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kubescape/operator
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+      
+  - name: "BUILD KUBESCAPER-OPERATOR BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: .
+      # secfixes:
+      #   0.2.121-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - CVE-2026-0861
+      #     - CVE-2026-0915 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: -s
+      output: operator
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: kubescape/operator
+    strip-prefix: v  
