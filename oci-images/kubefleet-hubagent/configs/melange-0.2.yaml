@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/kubefleet-dev/kubefleet
+# Reference: https://github.com/kubefleet-dev/kubefleet/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: hubagent
+  version: 0.2
+  epoch: 0
+  description: "KubeFleet is an open-source Kubernetes multi-cluster application management solution."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kubefleet-dev/kubefleet"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "01e1b48ac3fd197d2fa055cd2a3b9383dc5b340e"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KUBEFLEET SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kubefleet-dev/kubefleet
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+      
+  - name: "BUILD HUBEAGENT BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: ./cmd/hubagent
+      ldflags: -s
+      output: hubagent
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: kubefleet-dev/kubefleet
+    strip-prefix: v  
