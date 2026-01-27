@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/vmware-tanzu/velero
+# Reference: https://github.com/vmware-tanzu/velero/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: velero
+  version: 1.17.2
+  epoch: 0
+  description: "Backup and migrate Kubernetes applications and their persistent volumes"
+  target-architecture:
+    - x86_64  #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/vmware-tanzu/velero"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "7013a4097f17a97a0201c0ad3c9dd3f810d32bf6"
+  registry: "velero"
+
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING VELERO SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/vmware-tanzu/velero
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+      
+  - name: "BUILD VELERO BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: ./cmd/velero/velero.go
+      ldflags: | 
+        -s 
+        -X github.com/vmware-tanzu/velero/pkg/buildinfo.Version=${{package.version}}
+        -X github.com/vmware-tanzu/velero/pkg/buildinfo.GitSHA=${{vars.git_commit}}
+        -X github.com/vmware-tanzu/velero/pkg/buildinfo.GitTreeState=clean
+        -X github.com/vmware-tanzu/velero/pkg/buildinfo.ImageRegistry=${{vars.registry}}
+      output: velero
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: vmware-tanzu/velero
+    strip-prefix: v  
