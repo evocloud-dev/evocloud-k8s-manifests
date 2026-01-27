@@ -60,10 +60,6 @@ pipeline:
       packages: ./cmd/placement
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/pkg/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/pkg/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/pkg/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/pkg/version.minorFromGit=${{vars.git_minor}}
       output: placement
 
   - uses: strip
