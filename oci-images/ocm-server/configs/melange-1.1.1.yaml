@@ -60,10 +60,6 @@ pipeline:
       packages: ./cmd/server
       ldflags: |
         -s 
-        -X open-cluster-management.io/ocm/pkg/version.commitFromGit=${{vars.git_commit}}
-        -X open-cluster-management.io/ocm/pkg/version.versionFromGit=${{package.version}}
-        -X open-cluster-management.io/ocm/pkg/version.majorFromGit=${{vars.git_major}}
-        -X open-cluster-management.io/ocm/pkg/version.minorFromGit=${{vars.git_minor}}
       output: server
 
   - uses: strip
