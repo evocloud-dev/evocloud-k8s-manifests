@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/fluxcd/flagger
+# Reference: https://github.com/fluxcd/flagger/blob/main/Dockerfile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: flagger
+  version: 1.42.0
+  epoch: 1
+  description: "Progressive delivery Kubernetes operator (Canary, A/B Testing and Blue/Green deployments)"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/fluxcd/flagger"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "3a27fd147f8302cb08b0cac3750563c10f3b048e"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING FLAGGER SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/fluxcd/flagger
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+      
+  - name: "BUILD FLAGGER BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: ./cmd/flagger
+      # secfixes:
+      #   1.42.0-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: | 
+        -s 
+        -X github.com/fluxcd/flagger/pkg/version.REVISION=${{vars.git_commit}}
+      output: flagger
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: fluxcd/flagger
+    strip-prefix: v  
