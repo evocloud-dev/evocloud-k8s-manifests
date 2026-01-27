@@ -42,7 +42,7 @@ environment:
 
 entrypoint:
   type: ""
-  command: /usr/bin/registration 
+  command: /usr/bash #--entrypoint=server | --entrypoint=registration 
   shell-fragment: ""
   services: {}
 
