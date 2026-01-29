@@ -6,7 +6,7 @@
 # Reference: https://github.com/fluxcd/image-automation-controller/blob/main/Makefile
 
 package:
-  name: kustomize-controller
+  name: image-automation-controller
   version: 1.0.4
   epoch: 1
   description: "GitOps Toolkit controller that patches container image tags in Git"
