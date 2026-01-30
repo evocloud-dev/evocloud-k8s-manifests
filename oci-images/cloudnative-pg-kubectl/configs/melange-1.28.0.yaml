@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/cloudnative-pg/cloudnative-pg
+# Reference: https://github.com/cloudnative-pg/cloudnative-pg/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: kubectl-cnpg
+  version: 1.28.0
+  epoch: 0
+  description: "CloudNativePG is a comprehensive platform designed to seamlessly manage PostgreSQL databases within Kubernetes environments, covering the entire operational lifecycle from initial deployment to ongoing maintenance."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/cloudnative-pg/cloudnative-pg"
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "a9696201f760013182c6cdba7c4ed3c236a6423b"
+  build_date: "2026-01-29T09:12:03Z"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING CLOUDNATIVE-PG SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/cloudnative-pg/cloudnative-pg
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "BUILD KUBECTL-CNPG BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/kubectl-cnpg
+      ldflags: |
+        -s
+        -X github.com/cloudnative-pg/cloudnative-pg/pkg/versions.buildVersion=${{package.version}}
+        -X github.com/cloudnative-pg/cloudnative-pg/pkg/versions.buildCommit=${{vars.git_commit}}
+        -X github.com/cloudnative-pg/cloudnative-pg/pkg/versions.buildDate=${{vars.build_date}}
+      output: kubectl-cnpg
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: cloudnative-pg/cloudnative-pg
+    strip-prefix: v  
