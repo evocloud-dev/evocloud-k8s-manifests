@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# Source: https://github.com/kubernetes-sigs/cluster-api-operator
+# Reference: https://github.com/kubernetes-sigs/cluster-api-operator/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: clusterctl-operator
+  version: 0.24.1
+  epoch: 1
+  description: "Home for Cluster API Operator, a subproject of sig-cluster-lifecycle"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubernetes-sigs/cluster-api-operator"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "9685c23f592d775a52577fdb8223217d7fb8409b"
+  build_date: "2025-12-17T08:50:03Z"
+  git_major: "0"
+  git_minor: "24"
+  
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING CLUSTER-API-OPERATOR SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kubernetes-sigs/cluster-api-operator
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   0.24.1-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+
+  - name: "BUILD CLUSTERCTL-OPERATOR BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/plugin
+      ldflags: |
+        -s 
+        -X sigs.k8s.io/cluster-api-operator/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-operator/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-operator/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-operator/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-operator/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-operator/version.buildDate=${{vars.build_date}}
+        -X sigs.k8s.io/cluster-api-operator/version.gitReleaseCommit=${{vars.git_commit}} 
+      output: clusterctl-operator
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: kubernetes-sigs/cluster-api-operator
+    strip-prefix: v
