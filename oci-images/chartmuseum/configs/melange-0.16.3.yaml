@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/helm/chartmuseum
+# Reference: https://github.com/helm/chartmuseum/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: chartmuseum
+  version: 0.16.3
+  epoch: 10
+  description: "helm chart repository server."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/helm/chartmuseum"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "fce57c005209cf414254a234ecf3b841d25f9827"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING CHARTMUSEUM SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/helm/chartmuseum
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   0.16.3-r1:
+    #     - GHSA-6v2p-p543-phr9
+    #     - GHSA-mh63-6h87-95cp
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - CVE-2025-58181 
+    #     - GHSA-m6hq-p25p-ffr2
+    #     - GHSA-f6x5-jh6r-wrfv 
+    #     - GHSA-f9f8-9pmf-xv68 
+    #     - GHSA-9h84-qmv7-982p 
+    #     - GHSA-557j-xg8c-q2mm 
+    #     - GHSA-pwhc-rpq9-4c8w
+    #     - GHSA-4vq8-7jfc-9cvp
+    runs: |
+      go get golang.org/x/oauth2@v0.27.0
+      go get github.com/golang-jwt/jwt/v5@v5.3.0
+      go get golang.org/x/crypto@v0.45.0
+      go get github.com/containerd/containerd@v1.7.29
+      go get helm.sh/helm/v3@v3.18.5
+      go mod tidy
+      go mod vendor
+
+  - name: "BUILD CHARTMUSEUM BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/chartmuseum
+      ldflags: |
+        -s 
+        -X main.Version=${{package.version}}
+        -X main.Revision=${{vars.git_commit}}
+      output: chartmuseum
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: helm/chartmuseum
+    strip-prefix: v
