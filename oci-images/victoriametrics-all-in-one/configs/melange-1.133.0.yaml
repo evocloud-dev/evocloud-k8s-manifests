@@ -1,0 +1,124 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/VictoriaMetrics/VictoriaMetrics
+# Reference: https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: victoriametrics-all-in-one
+  version: 1.133.0
+  epoch: 0
+  description: "VictoriaMetrics: fast, cost-effective monitoring solution and time series database"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/VictoriaMetrics/VictoriaMetrics"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "e8160fc8fba21bc4c539a30fa63eb3618f964578"
+  build_date: "2026-01-07T11:12:54Z"
+  build_info: "v1.133.0-20260109-e8160fc8f"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING VICTORIAMETRICS SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/VictoriaMetrics/VictoriaMetrics
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+      
+  - name: "BUILD VICOTRIA-METRICS BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/victoria-metrics
+      ldflags: |
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: victoria-metrics
+
+  - name: "BUILD VMAGENT BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/vmagent
+      ldflags: |
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: vmagent
+
+  - name: "BUILD VMALERT BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/vmalert
+      ldflags: |
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: vmalert
+
+  - name: "BUILD VMALERT-TOOL BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/vmalert-tool
+      ldflags: 
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: vmalert-tool
+
+  - name: "BUILD VMAUTH BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/vmauth
+      ldflags: 
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: vmauth
+
+  - name: "BUILD VMBACKUP BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/vmbackup
+      ldflags: 
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: vmbackup
+
+  - name: "BUILD VMRESTORE BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/vmrestore
+      ldflags: 
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: vmrestore
+
+  
+  - name: "BUILD VMCTL BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./app/vmctl
+      ldflags: 
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=victoria-metrics-${{vars.build_date}}-${{vars.build_info}}
+      output: vmctl
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: VictoriaMetrics/VictoriaMetrics
+    strip-prefix: v  
