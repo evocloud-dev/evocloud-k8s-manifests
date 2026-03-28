@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/projectcapsule/capsule
+# Reference: https://github.com/projectcapsule/capsule/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: capsule
+  version: 0.12.4
+  epoch: 0
+  description: "Multi-tenancy and policy-based framework for Kubernetes."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/projectcapsule/capsule"
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "1acf63c411f1277691c5a4b2a79a477917dd48d2"
+  build_time: "2026-01-23T09:06:57Z"
+
+
+pipeline:
+  - name: "CRETAING CAPSULE DIR"
+    runs: |
+      mkdir capsule
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING CAPSULE SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/projectcapsule/capsule/archive/v${{package.version}}/capsule-${{package.version}}.tar.gz
+      expected-sha512: 9516ead21e2965c6071f1fa9f21ed5a780751bb71718a507a2bfbcdba1e5daeecf19fa0e31367a2f0f76bee41b54e78ddfda35be93d7f4590aa4d9f8f47e8097 
+      directory: capsule
+      delete: true
+
+  - name: "BUILD CAPSULE BINARY"
+    uses: go/build
+    with:
+      modroot: capsule
+      packages: ./cmd
+      ldflags: |
+        -s
+        -X main.Version=${{package.version}}
+        -X main.GitCommit=${{vars.git_commit}}
+        -X main.GitTag=${{package.version}}
+        -X main.GitDirty=${{vars.build_time}}
+        -X main.BuildTime=${{vars.build_time}}
+        -X main.GitRepo=${{package.name}}
+      output: capsule
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf capsule
