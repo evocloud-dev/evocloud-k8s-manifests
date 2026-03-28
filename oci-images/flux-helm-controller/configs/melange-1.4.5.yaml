@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/fluxcd/helm-controller
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/fluxcd/helm-controller/blob/main/Makefile
+
+package:
+  name: helm-controller
+  version: 1.4.5
+  epoch: 1
+  description: "The GitOps Toolkit Helm reconciler, for declarative Helming"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/fluxcd/helm-controller"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "CREATING HELM-CONTROLLER DIR"
+    runs: |
+      mkdir helm-controller
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING HELM-CONTROLLER SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/fluxcd/helm-controller/archive/v${{package.version}}/helm-controller-${{package.version}}.tar.gz
+      expected-sha512: 9901acafd856896be93f154d0c6cf42c9348f281b0ecb07ed3b6f1f74a8ec1bf22eb40278667a74c60d2bba07b953f460e1c2a1bdefd8f16c7baf6e19be187e9
+      directory: helm-controller
+      delete: true
+
+  - name: "BUILDING HELM-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: helm-controller
+      packages: .
+      # secfixes:
+      #   1.4.5-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: -s 
+      output: helm-controller
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf helm-controller
+ 
