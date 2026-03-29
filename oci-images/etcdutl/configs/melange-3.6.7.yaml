@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/etcd-io/etcd
+# Reference: https://github.com/etcd-io/etcd/blob/main/scripts/build_lib.sh
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: etcdutl
+  version: 3.6.7
+  epoch: 1
+  description: "Distributed reliable key-value store for the most critical data of a distributed system"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/etcd-io/etcd"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "e838ef116fc368b321ddf2e424167b15174fb80d"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING ETCD SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/etcd-io/etcd
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "BUILD ETCDUTL BINARY"
+    uses: go/build
+    with:
+      modroot: ./etcdutl
+      packages: .
+      # secfixes:
+      #   3.6.7-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: |
+        -s
+        -X go.etcd.io/etcd/api/v3/version.Version=${{package.version}}
+        -X go.etcd.io/etcd/api/v3/version.GitSHA=${{vars.git_commit}}
+      output: etcdutl
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: etcd-io/etcd
+    strip-prefix: v  
