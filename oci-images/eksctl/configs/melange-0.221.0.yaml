@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/eksctl-io/eksctl
+# Reference: https://github.com/eksctl-io/eksctl/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: eksctl 
+  version: 0.221.0
+  epoch: 1
+  description: "The official CLI for Amazon EKS"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/eksctl-io/eksctl"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "de9424a29cd8108ff4574d54844e4e98175efac8"
+  build_date: "2026-01-16T10:52:26Z"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING EKSCTL SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/eksctl-io/eksctl
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   0.221.0-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - CVE-2026-0861 
+    #     - GHSA-m6hq-p25p-ffr2 
+    #     - CVE-2026-0915 
+    #     - GHSA-f6x5-jh6r-wrfv 
+    #     - GHSA-pwhc-rpq9-4c8w 
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go get github.com/containerd/containerd@v1.7.29 
+      go mod tidy
+      go mod vendor
+      
+  - name: "BUILD EKSCTL BINARY" 
+    uses: go/build 
+    with: 
+      modroot: . 
+      packages: ./cmd/eksctl 
+      ldflags: | 
+        -s 
+        -X github.com/weaveworks/eksctl/pkg/version.gitCommit=${{vars.git_commit}} 
+        -X github.com/weaveworks/eksctl/pkg/version.buildDate=${{vars.build_date}} 
+      output: eksctl 
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: weaveworks/eksctl
+    strip-prefix: v  

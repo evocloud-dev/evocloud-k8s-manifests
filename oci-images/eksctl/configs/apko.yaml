@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/eksctl-io/eksctl
+# Ref: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
+# Schema: https://github.com/chainguard-dev/apko/blob/51830a2e043ace2da4eba4265083b2e3298437a8/pkg/build/types/schema.json
+
+
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+    - '@local /work/packages'
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    - ./melange.rsa.pub
+  packages:
+    - eksctl@local
+
+annotations:
+  org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
+  org.opencontainers.image.title: Eksctl  (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free Eksctl  OCI image
+  org.opencontainers.image.source: https://github.com/eksctl-io/eksctl
+  org.opencontainers.image.licenses: MPL-2.0
+  org.opencontainers.image.vendor: EvoCloud
+  org.opencontainers.image.version: "0.221.0"
+
+accounts:
+  groups:
+    - groupname: nonroot
+      gid: 65510
+      members: []
+  users:
+    - username: nonroot
+      uid: 65510
+      shell: /bin/false
+     #homedir: /dev/null
+  run-as: nonroot
+
+environment:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+
+entrypoint:
+  type: ""
+  command: /usr/bin/eksctl 
+  shell-fragment: ""
+  services: {}
+
+#https://github.com/chainguard-dev/apko/blob/main/docs/layering.md
+#layering:
+#  strategy: "origin"
+#  budget: 10
+archs:
+  - amd64
+
+
