@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/metallb/metallb
+# Reference:  https://github.com/metallb/metallb/blob/main/speaker/Dockerfile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: speaker
+  version: 0.15.3
+  epoch: 0
+  description: "A network load-balancer implementation for Kubernetes using standard routing protocols."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/metallb/metallb"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "85bfb4f0e0d35090c514e1e5e1a21a8bbd253518"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING METALLB SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/metallb/metallb
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+
+  - name: "BUILD SPEAKER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./speaker
+      ldflags: |
+        -s 
+        -X go.universe.tf/metallb/internal/version.gitCommit=${{vars.git_commit}}
+        -X go.universe.tf/metallb/internal/version.gitBranch=${{package.version}}
+      output: speaker
+
+  - name: "BUILD FRR-METRICS BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./frr-tools/metrics/exporter.go
+      ldflags: |
+        -s 
+        -X go.universe.tf/metallb/internal/version.gitCommit=${{vars.git_commit}}
+        -X go.universe.tf/metallb/internal/version.gitBranch=${{package.version}}
+      output: frr-metrics
+
+  - name: "BUILD CP-TOOL BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./frr-tools/cp-tool/cp-tool.go
+      ldflags: |
+        -s 
+        -X go.universe.tf/metallb/internal/version.gitCommit=${{vars.git_commit}}
+        -X go.universe.tf/metallb/internal/version.gitBranch=${{package.version}}
+      output: cp-tool 
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: metallb/metallb
+    strip-prefix: v
