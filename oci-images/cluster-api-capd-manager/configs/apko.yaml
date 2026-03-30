@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# Source:
+# Ref: https://github.com/kubernetes-sigs/cluster-api
+# Schema: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
+
+
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+    - '@local /work/packages'
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    - ./melange.rsa.pub
+  packages:
+    - cluster-api-capd-manager@local
+
+annotations:
+  org.opencontainers.image.authors: EvoCloud Engineering Team <maintainers@evocloud.dev>
+  org.opencontainers.image.title: cluster-api-capd-manager (Packaged by EvoCloud)
+  org.opencontainers.image.description: Distroless and near CVE-free cluster-api-capd-manager OCI image
+  org.opencontainers.image.source: https://github.com/kubernetes-sigs/cluster-api
+  org.opencontainers.image.licenses: MPL-2.0
+  org.opencontainers.image.vendor: EvoCloud
+  org.opencontainers.image.version: "1.12.0"
+
+accounts:
+  groups:
+    - groupname: nonroot
+      gid: 65510
+      members: []
+  users:
+    - username: nonroot
+      uid: 65510
+      shell: /bin/false
+   #   homedir: /dev/null
+  run-as: nonroot
+
+environment:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+
+entrypoint:
+  command: /usr/bin/capd-manager 
+
+archs:
+  - amd64
+
+
