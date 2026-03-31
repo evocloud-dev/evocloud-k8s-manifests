@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/kube-vip/kube-vip-cloud-provider
+# Reference: https://github.com/kube-vip/kube-vip-cloud-provider/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: kube-vip-cloud-provider
+  version: 0.0.12
+  epoch: 1
+  description: "A general purpose cloud provider for Kube-Vip"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kube-vip/kube-vip-cloud-provider"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "c2f036f39d1429ca7d8d30e82f686b66c5e0d15a"
+ 
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING KUBE-VIP-CLOUD-PROVIDER SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/kube-vip/kube-vip-cloud-provider
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "BUILD KUBE-VIP-CLOUD-PROVIDER BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: .
+      # secfixes:
+      #   0.0.12-r1:
+      #     - GHSA-6v2p-p543-phr9
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - GHSA-vvgc-356p-c3xw 
+      #     - GHSA-f6x5-jh6r-wrfv
+      deps: golang.org/x/crypto@v0.45.0 golang.org/x/oauth2@v0.27.0 golang.org/x/net@v0.38.0 
+      ldflags: | 
+        -s 
+        -X main.Version=v${{package.version}}
+        -X main.Build=${{vars.git_commit}}
+        -X k8s.io/component-base/version.gitVersion=v${{package.version}}
+      output: kube-vip-cloud-provider
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: kube-vip/kube-vip-cloud-provider
+    strip-prefix: v  
