@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/dapr/dapr
+# Reference: https://github.com/dapr/dapr/blob/master/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: placement
+  version: 1.16.6
+  epoch: 0
+  description: "Dapr is a portable runtime for building distributed applications across cloud and edge, combining event-driven architecture with workflow orchestration."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/dapr/dapr"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "b16d781bfa9c6bb7e324775492d0901ce97b397e"
+ 
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING DAPR SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository:  https://github.com/dapr/dapr
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+      
+
+  - name: "BUILD PLACEMENT BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/placement
+      ldflags: |
+        -s 
+        -X github.com/dapr/dapr/pkg/buildinfo.gitcommit=${{vars.git_commit}} 
+        -X github.com/dapr/dapr/pkg/buildinfo.gitversion=${{package.version}}
+        -X github.com/dapr/dapr/pkg/buildinfo.version=${{package.version}} 
+        -X github.com/dapr/kit/logger/DaprVersion=${{package.version}}
+      output: placement
+      
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: dapr/dapr
+    strip-prefix: v  
