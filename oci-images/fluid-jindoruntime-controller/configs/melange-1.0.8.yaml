@@ -1,0 +1,80 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/fluid-cloudnative/fluid
+# Reference: https://github.com/fluid-cloudnative/fluid/blob/master/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: jindoruntime-controller
+  version: 1.0.8
+  epoch: 1
+  description: "Fluid, elastic data abstraction and acceleration for BigData/AI applications in cloud. (Project under CNCF)."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/fluid-cloudnative/fluid"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "de578cd23c56a83b527ac00586ab1659cf460f68"
+  build_date: "2026-01-22T08:56:40Z"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING FLUID SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/fluid-cloudnative/fluid
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.0.8-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    #     - GHSA-3wgm-2gw2-vh5m
+    #     - GHSA-4x4m-3c2p-qppc
+    #     - GHSA-r6j8-c6r2-37rr
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go mod tidy
+      go mod vendor
+  
+  - name: "BUILD JINDORUNTIME-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/jindo
+      ldflags: |
+        -s 
+        -X github.com/fluid-cloudnative/fluid.version=${{package.version}}
+        -X github.com/fluid-cloudnative/fluid.gitCommit=${{vars.git_commit}}
+        -X github.com/fluid-cloudnative/fluid.buildDate=${{vars.build_date}}
+        -X github.com/fluid-cloudnative/fluid.gitTreeState=clean
+      output: jindoruntime-controller
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: fluid-cloudnative/fluid
+    strip-prefix: v
