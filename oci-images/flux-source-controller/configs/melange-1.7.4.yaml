@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/fluxcd/source-controller
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/fluxcd/source-controller/blob/main/Makefile
+
+package:
+  name: source-controller
+  version: 1.7.4
+  epoch: 1
+  description: "The GitOps Toolkit source management component"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/fluxcd/source-controller"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+pipeline:
+  - name: "CREATING SOURCE-CONTROLLER DIR"
+    runs: |
+      mkdir source-controller
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING SOURCE-CONTROLLER SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/fluxcd/source-controller/archive/v${{package.version}}/source-controller-${{package.version}}.tar.gz
+      expected-sha512: ab35ca70ebde2e0adfb88e02b703597898d7ba9cc8f4c789673b24b16f377892526dfbdde755856299c4d452238ff1f3923b463ff0b50598664cd06739944141
+      directory: source-controller
+      delete: true
+
+  - name: "BUILDING SOURCE-CONTROLLER BINARY"
+    uses: go/build
+    with:
+      modroot: source-controller
+      packages: .
+      # secfixes:
+      #   1.7.4-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x 
+      #     - GHSA-f83f-xpx7-ffpw
+      #     - GHSA-4qg8-fj49-pxjh 
+      #     - GHSA-59jp-pj84-45mr
+      #     - GHSA-whqx-f9j3-ch6m 
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: -s 
+      output: source-controller
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf source-controller
+ 
