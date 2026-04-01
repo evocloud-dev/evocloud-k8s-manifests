@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/VictoriaMetrics/operator
+# Reference: https://github.com/VictoriaMetrics/operator/blob/master/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: operator
+  version: 0.66.1
+  epoch: 0
+  description: "The VictoriaMetrics Operator is a Kubernetes tool that automates the deployment, scaling, and management of VictoriaMetrics monitoring components."
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/VictoriaMetrics/operator"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "84a49bcc07103f054aa68e2dea3c9c2dfc320e05"
+  build_info: "v0.66.1"
+  component: "operator"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING VICTORIAMETRICS OPERATOR SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/VictoriaMetrics/operator
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+      
+
+  - name: "BUILD OPERATOR BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd
+      ldflags: 
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=${{vars.component}}-${{vars.build_info}}
+      output: operator
+ 
+  - name: "BUILD CONFIG-RELOADER BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/config-reloader
+      ldflags: 
+        -s -X github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo.Version=${{vars.component}}-${{vars.build_info}}
+      output: config-reloader
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: VictoriaMetrics/operator
+    strip-prefix: v  
