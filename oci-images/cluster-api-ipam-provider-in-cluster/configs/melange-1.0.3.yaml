@@ -1,0 +1,76 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+#
+# Source: https://github.com/kubernetes-sigs/cluster-api-ipam-provider-in-cluster
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+# Reference: https://github.com/kubernetes-sigs/cluster-api-ipam-provider-in-cluster/blob/main/Makefile
+
+package:
+  name: cluster-api-ipam-provider-in-cluster 
+  version: 1.0.3
+  epoch: 0
+  description: "An IPAM provider for Cluster API that manages pools of IP addresses using Kubernetes resources."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/kubernetes-sigs/cluster-api-ipam-provider-in-cluster"
+  #dependencies:
+  #  runtime:
+  #    - bubblewrap
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: 6518ef9b44cfc4f8c3f7139b2ce4ae71523deff6
+  build_date: "2025-12-22T9:10:28Z"
+  git_major: "1"
+  git_minor: "0"
+
+pipeline:
+  - name: "CREATING CLUSTER-API-IPAM-PROVIDER-IN-CLUSTER"
+    runs: |
+      mkdir cluster-api-ipam-provider-in-cluster 
+
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/fetch.yaml
+  - name: "DOWNLOADING CLUSTER-API-IPAM-PROVIDER-IN-CLUSTER SOURCE CODE"
+    uses: fetch
+    with:
+      uri: https://github.com/kubernetes-sigs/cluster-api-ipam-provider-in-cluster/archive/v${{package.version}}/cluster-api-ipam-provider-in-cluster-${{package.version}}.tar.gz
+      expected-sha512: df6e4c68cd49ac77fae1bfc30567929f213e79dbbd481dee8e31a077389de95fa652c3f0e563049e5e026cbf2d6d2fda6b062504398904690c5946b6fbd9f541
+      directory: cluster-api-ipam-provider-in-cluster 
+      delete: true
+
+  - name: "BUILDING MANAGER BINARY"
+    uses: go/build
+    with:
+      modroot: cluster-api-ipam-provider-in-cluster 
+      packages: .
+      ldflags:
+        -s 
+        -X sigs.k8s.io/sigs.k8s.io/cluster-api-ipam-provider-in-cluster/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/sigs.k8s.io/cluster-api-ipam-provider-in-cluster/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/sigs.k8s.io/cluster-api-ipam-provider-in-cluster/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/sigs.k8s.io/cluster-api-ipam-provider-in-cluster/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/sigs.k8s.io/cluster-api-ipam-provider-in-cluster/version.gitTreeState=clean
+        -X sigs.k8s.io/sigs.k8s.io/cluster-api-ipam-provider-in-cluster/version.buildDate=${{vars.build_date}}
+      output: cluster-api-ipam-provider-in-cluster 
+
+  - uses: strip #Strip debugging symbols
+
+  - name: "REMOVING DETRITUS"
+    runs: |
+      rm -rf cluster-api-ipam-provider-in-cluster
+ 
