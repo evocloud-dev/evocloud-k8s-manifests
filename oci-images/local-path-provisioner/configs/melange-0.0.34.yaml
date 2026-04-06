@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/rancher/local-path-provisioner
+# Reference: https://github.com/rancher/local-path-provisioner/blob/master/scripts/build
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: local-path-provisioner
+  version: 0.0.34
+  epoch: 0
+  description: "Dynamically provisioning persistent local storage with Kubernetes"
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/rancher/local-path-provisioner"
+
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "af49f3fdf69e2e5ad790d295b6005ba3767ec991"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING LOCAL-PATH-PROVISIONER SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/rancher/local-path-provisioner
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+      
+  - name: "BUILD LOCAL-PATH-PROVISIONER BINARY" 
+    uses: go/build 
+    with: 
+      modroot: .
+      packages: .
+      ldflags: 
+        -s -extldflags -static
+        -X main.VERSION=${{package.version}}
+      output: local-path-provisioner
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: rancher/local-path-provisioner
+    strip-prefix: v  
