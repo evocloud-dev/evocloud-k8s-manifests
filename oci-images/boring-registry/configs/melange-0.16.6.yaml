@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/boring-registry/boring-registry
+# Reference: https://github.com/boring-registry/boring-registry/blob/main/.goreleaser.yml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: boring-registry
+  version: 0.16.6
+  epoch: 0
+  description: "A Simple Terraform Provider and Module Registry"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/boring-registry/boring-registry"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "5bfab3e442b8d1a2e2333a8df6dca1188165ea82"
+  build_date: "2026-01-14T14:09:12Z"
+ 
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING BORING-REGISTRY SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/boring-registry/boring-registry
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+      
+  - name: "BUILD BORING-REGISTRY BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: .
+      ldflags: |
+        -s 
+        -X github.com/boring-registry/boring-registry/version.Version=${{package.version}}
+        -X github.com/boring-registry/boring-registry/version.Commit=${{vars.git_commit}}
+        -X github.com/boring-registry/boring-registry/version.Date=${{vars.build_date}}
+        -X github.com/boring-registry/boring-registry/version.BuiltBy=goreleaser
+      output: boring-registry
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: boring-registry/boring-registry
+    strip-prefix: v  
