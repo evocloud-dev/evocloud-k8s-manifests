@@ -1,0 +1,91 @@
+# SPDX-FileCopyrightText: 2026 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# Source: https://github.com/openyurtio/openyurt
+# Reference: https://github.com/openyurtio/openyurt/blob/master/.goreleaser.yaml
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+
+package:
+  name: yurtadm
+  version: 1.6.1
+  epoch: 1
+  description: "OpenYurt - Extending your native Kubernetes to edge(project under CNCF)."
+  target-architecture:
+    - x86_64 #supported architectures: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x, x86_64, aarch64, and all that builds it for all of them
+  copyright:
+    - license: Apache-2.0
+    - attestation: |
+        Created by the EvoCloud Engineering Team. 
+        Copyright (C) 2026 EvoCloud, Inc.
+      license: MPL-2.0
+      paths:
+        - "*"
+  url: "https://github.com/openyurtio/openyurt"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "873aa9edd4b7d4c0009e10426a6012b80079a349"
+  build_date: "2026-01-21T09:45:25Z"
+
+pipeline:
+  #https://github.com/chainguard-dev/melange/blob/main/pkg/build/pipelines/git-checkout.yaml
+  - name: "DOWNLOADING OPENYURT SOURCE CODE"
+    uses: git-checkout
+    with:
+      repository: https://github.com/openyurtio/openyurt
+      expected-commit: ${{vars.git_commit}}
+      tag: v${{package.version}}
+
+  - name: "PATCHING GO MODULES"
+    # secfixes:
+    #   1.6.1-r1:
+    #     - GHSA-j5w8-q4qc-rx2x
+    #     - GHSA-f6x5-jh6r-wrfv
+    #     - GHSA-v778-237x-gjrc 
+    #     - GHSA-c5q2-7r4c-mv6g 
+    #     - GHSA-hcg3-q754-cr77 
+    #     - GHSA-6v2p-p543-phr9 
+    #     - GHSA-mh63-6h87-95cp 
+    #     - GHSA-c6gw-w398-hv78
+    #     - GHSA-cgrx-mc8f-2prm
+    #     - GHSA-vvgc-356p-c3xw
+    #     - GHSA-qxp5-gwg8-xv66
+    runs: |
+      go get golang.org/x/crypto@v0.45.0
+      go get golang.org/x/oauth2@v0.27.0
+      go get github.com/golang-jwt/jwt/v5@v5.3.0
+      go get github.com/go-jose/go-jose/v3@v3.0.4
+      go get github.com/opencontainers/selinux@v1.13.0
+      go get github.com/golang-jwt/jwt/v5@v5.3.0
+      go get golang.org/x/net@v0.38.0
+      go mod tidy
+      go mod vendor
+
+  - name: "BUILD YURTADM BINARY"
+    uses: go/build
+    with:
+      modroot: .
+      packages: ./cmd/yurtadm/yurtadm.go
+      ldflags: |
+        -s 
+        -X github.com/openyurtio/openyurt/pkg/projectinfo.gitVersion=${{package.version}} 
+        -X github.com/openyurtio/openyurt/pkg/projectinfo.gitCommit=${{vars.git_commit}}
+        -X github.com/openyurtio/openyurt/pkg/projectinfo.buildDate=${{vars.build_date}}
+      output: yurtadm
+
+  - uses: strip
+
+update:
+  enabled: true
+  github:
+    identifier: openyurtio/openyurt
+    strip-prefix: v
