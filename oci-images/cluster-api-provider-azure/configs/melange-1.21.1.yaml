@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2025 EvoCloud, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# Source: https://github.com/kubernetes-sigs/cluster-api-provider-azure
+# Reference: https://github.com/kubernetes-sigs/cluster-api-provider-azure/blob/main/Makefile
+# Schema: https://github.com/chainguard-dev/melange/blob/main/docs/BUILD-FILE.md
+
+package:
+  name: cluster-api-provider-azure
+  version: 1.21.1
+  epoch: 1
+  description: "Cluster API implementation for Microsoft Azure"
+  target-architecture:
+    - x86_64
+  copyright:
+    - attestation: |
+        Created by the EvoCloud Engineering Team.
+        Copyright (C) 2025 EvoCloud, Inc.
+      license: MPL-2.0
+  url: "https://github.com/kubernetes-sigs/cluster-api-provider-azure"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - ca-certificates-bundle
+
+vars:
+  git_commit: "8ee53868c1a8acbf28c3a55f3edcd1c830bbe4e7"
+  build_date: "2025-12-15T17:15:28Z"
+  git_major: "1"
+  git_minor: "21"
+
+pipeline:
+  - name: "Prepare extraction directory"
+    runs: |
+      mkdir -p cluster-api-provider-azure
+
+  - name: "Download Cluster-api-provider-azure source"
+    uses: fetch
+    with:
+      uri: https://github.com/kubernetes-sigs/cluster-api-provider-azure/archive/refs/tags/v${{package.version}}.tar.gz
+      expected-sha512: cdb0e3d5be8f74241887567852a395b42c2875bc881a0158a33475bf99de415da6882d20eb216759a4fb7cd1a29f102a09f984fe8a530918257b229fbe060d9b
+      directory: cluster-api-provider-azure
+      delete: true
+
+
+
+  - name: "BUILD CLUSTER-API-PROVIDER-AZURE BINARY"
+    uses: go/build
+    with:
+      modroot: cluster-api-provider-azure
+      packages: . 
+      # secfixes:
+      #   1.21.1-r1:
+      #     - GHSA-f6x5-jh6r-wrfv
+      #     - GHSA-j5w8-q4qc-rx2x
+      deps: golang.org/x/crypto@v0.45.0
+      ldflags: |
+        -s 
+        -X sigs.k8s.io/cluster-api-provider-azure/version.gitMajor=${{vars.git_major}}
+        -X sigs.k8s.io/cluster-api-provider-azure/version.gitMinor=${{vars.git_minor}}
+        -X sigs.k8s.io/cluster-api-provider-azure/version.gitVersion=${{package.version}}
+        -X sigs.k8s.io/cluster-api-provider-azure/version.gitCommit=${{vars.git_commit}}
+        -X sigs.k8s.io/cluster-api-provider-azure/version.gitTreeState=clean
+        -X sigs.k8s.io/cluster-api-provider-azure/version.buildDate=${{vars.build_date}}
+      output: cluster-api-provider-azure
+
+  - uses: strip
+
+  - name: "Cleanup"
+    runs: |
+      rm -rf cluster-api-provider-azure
